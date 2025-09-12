@@ -1,0 +1,19 @@
+# Java / Spring
+target/
+*.class
+*.log
+*.jar
+*.war
+/.idea/
+/*.iml
+/.mvn/
+
+# Node / React
+node_modules/
+dist/
+build/
+.env
+
+# OS files
+.DS_Store
+Thumbs.db

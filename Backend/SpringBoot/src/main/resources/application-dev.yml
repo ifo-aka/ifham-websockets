@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/university
+    username: root
+    password: ifhamAkazai
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+file:
+  upload-dir: "C:/Users/dell/Desktop/SpringCore/src/main/resources/photos"
+
+
+
+jwt:
+  secret: "lkjgc87y3iul4biuqweyf9p7ykjebkl3uyr98ywhekjfbiuowe6yf97pq2h3krjbo7826tr7qwiuehbfjkbe7w6f9723hrkjbi7fe6q78yrhjk3b4r78o6te87yrhgrkjq34rbi76ef7yhq34ujrbhie76r0f6q3p4ouihrkjge78f697wehrkjbrio23tr07gri487"
+  expiration-ms: 3600000
