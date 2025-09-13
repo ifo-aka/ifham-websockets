@@ -1,0 +1,15 @@
+/* src/assets/NavLink.module.css */
+.link {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s ease-in-out;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.active {
+  color: #61dafb; /* highlight active link */
+}

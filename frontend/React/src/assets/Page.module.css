@@ -1,0 +1,62 @@
+/* General page wrapper */
+.page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem;
+  min-height: calc(100vh - 70px); /* leaves space for header */
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+}
+
+/* Title */
+.page h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Form container */
+.form {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* Input fields inside form */
+.form input {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  transition: border-color 0.2s;
+}
+
+.form input:focus {
+  border-color: #61dafb;
+  outline: none;
+}
+
+/* Button styles (if not styled inside Button.jsx) */
+.form button {
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: #61dafb;
+  color: #fff;
+  transition: background 0.2s ease-in-out;
+}
+
+.form button:hover {
+  background: #21a1f1;
+}
