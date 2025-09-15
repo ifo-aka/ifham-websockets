@@ -1,6 +1,6 @@
 import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
 //import login , signup , refresh  api from DBUtils
-import { login as dbLogin , signup as dbSignup, refreshToken as dbRefreshToken} from "../DBUtils";
+import { login as dbLogin , signup as dbSignup, refreshToken as dbRefreshToken} from "../../utils/DBUtils";
 
 
 export const signupThunk = createAsyncThunk("api/auth/signup", async (userData, { dispatch ,rejectWithValue}) => {
@@ -89,6 +89,8 @@ const authSlice = createSlice({
             })
             .addCase(signupThunk.fulfilled, (state, action) =>{
                  const {id,username,email,token} = action.payload.data;
+                 console.log(action.payload.data);
+                 state.authChecked= true;
                 state.token = token;
                 state.isAuthenticated = true;
                 state.userObject = {id,username,email};

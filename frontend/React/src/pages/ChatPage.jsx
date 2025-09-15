@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageLayout from "../components/PageLayout";
 import styles from "../assets/ChatPage.module.css";
+import Container from "../components/Container";
 
 const ChatPage = () => {
   const myId =2;
@@ -40,7 +41,7 @@ const ChatPage = () => {
   };
 
   return (
-    <PageLayout>
+    < Container>
       <div className={styles.chatContainer}>
         {/* Sidebar */}
         <aside className={styles.sidebar}>
@@ -86,7 +87,7 @@ const ChatPage = () => {
           </form>
         </section>
       </div>
-    </PageLayout>
+   </Container>
   );
 };
 

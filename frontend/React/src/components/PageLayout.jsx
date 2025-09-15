@@ -2,11 +2,11 @@
 import Header from "./Header";
 import styles from "../assets/PageLayout.module.css";
 
-const PageLayout = ({ children }) => {
+const PageLayout = () => {
   return (
     <div className={styles.layout}>
       <Header />
-      <main className={styles.main}>{children}</main>
+  
     </div>
   );
 };

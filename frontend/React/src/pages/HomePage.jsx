@@ -3,10 +3,11 @@ import PageLayout from "../components/PageLayout";
 import Button from "../components/Button";
 import styles from "../assets/HomePage.module.css";
 import Card from "../components/Card";
+import Container from "../components/Container";
 
 const HomePage = () => {
   return (
-    <PageLayout>
+    <Container>
       <section className={styles.hero}>
         <h1 className={styles.title}>🚀 Welcome to WebSocket</h1>
         <p className={styles.subtitle}>
@@ -49,7 +50,7 @@ const HomePage = () => {
         
         
       </section>
-    </PageLayout>
+    </Container>
   );
 };
 

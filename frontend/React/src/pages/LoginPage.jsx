@@ -4,6 +4,7 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import PageLayout from "../components/PageLayout";
 import styles from "../assets/Page.module.css";
+import Container from "../components/Container";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -15,7 +16,7 @@ const LoginPage = () => {
   };
 
   return (
-    <PageLayout>
+    <Container>
       <div className={styles.page}>
         <h2>Login</h2>
         <form onSubmit={handleLogin} className={styles.form}>
@@ -38,7 +39,7 @@ const LoginPage = () => {
           <Button type="submit">Login</Button>
         </form>
       </div>
-    </PageLayout>
+   </Container>
   );
 };
 

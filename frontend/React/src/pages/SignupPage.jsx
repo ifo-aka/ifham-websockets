@@ -5,6 +5,7 @@ import PageLayout from "../components/PageLayout";
 import styles from "../assets/Page.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { signupThunk ,setShowSpinner} from "../store/slices/authSlics";
+import Container from "../components/Container";
 
 const SignupPage = () => {
   const dispatch = useDispatch();
@@ -117,7 +118,7 @@ const SignupPage = () => {
   };
 
   return (
-    <PageLayout>
+    <Container>
       <div className={styles.page}>
         <h2>Sign Up</h2>
         <form onSubmit={handleSignup} className={styles.form}>
@@ -212,7 +213,7 @@ const SignupPage = () => {
           <Button type="submit">Sign Up</Button>
         </form>
       </div>
-    </PageLayout>
+    </Container>
   );
 };
 
