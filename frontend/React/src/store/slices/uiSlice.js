@@ -7,7 +7,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 
 const uiSlice = createSlice({
-    name : ui,
+    name : "ui",
     initialState:{
         isMobileDimention :false,
         isDesktopDimention: true,

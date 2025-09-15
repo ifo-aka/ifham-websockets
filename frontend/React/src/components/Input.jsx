@@ -1,7 +1,7 @@
 // src/components/Input.jsx
 import styles from "../assets/Input.module.css";
-
-const Input = ({ label, type = "text",name, value, onChange, placeholder }) => {
+  
+const Input = ({ label, type = "text",name, value, onChange, placeholder, required }) => {
   return (
     <div className={styles.inputGroup}>
       {label && <label className={styles.label}>{label}</label>}
@@ -13,6 +13,7 @@ const Input = ({ label, type = "text",name, value, onChange, placeholder }) => {
         onChange={onChange}
         placeholder={placeholder}
         className={styles.input}
+        required= {required}
       />
     </div>
   );

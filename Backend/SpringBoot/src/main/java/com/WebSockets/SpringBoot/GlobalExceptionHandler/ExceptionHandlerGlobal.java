@@ -54,6 +54,6 @@ public class ExceptionHandlerGlobal  {
     public ResponseEntity<APIResponse<String>> handleOtherExceptions(Exception ex) {
         ex.printStackTrace(); // Or use a logger
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new APIResponse<>(false, "Something went wrong on the server", null));
+                .body(new APIResponse<>(false, "Something went wrong on the server", ex.getMessage()));
     }
 }

@@ -3,10 +3,15 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import PageLayout from "../components/PageLayout";
 import styles from "../assets/Page.module.css";
+import { useDispatch, useSelector } from "react-redux";
+import { signupThunk ,setShowSpinner} from "../store/slices/authSlics";
 
 const SignupPage = () => {
+  const dispatch = useDispatch();
+  const { showSpinner, isAuthenticated, userObject } = useSelector((s) => s.auth);
+
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -18,6 +23,7 @@ const SignupPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData({
       ...formData,
       [name]: value,
@@ -95,8 +101,18 @@ const SignupPage = () => {
       );
       return;
     }
+    const obj = {
+      username : formData.username,
+      email: formData.email,
+      password: formData.password
+    }
+  dispatch(setShowSpinner(true));
+    dispatch(signupThunk(obj)).then((response ) => {
+      console.log("Signup response:", response);
+    }
+  )
 
-    console.log("✅ Signing up:", formData);
+    console.log("✅ Signing up:", obj);
     setError("");
   };
 
@@ -108,8 +124,8 @@ const SignupPage = () => {
           <Input
             label="Name"
             type="text"
-            name="name"
-            value={formData.name}
+            name="username"
+            value={formData.username}
             onChange={handleChange}
             placeholder="Enter your name"
           />

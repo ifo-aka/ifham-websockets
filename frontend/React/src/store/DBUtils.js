@@ -27,10 +27,16 @@ const apiFetch = async ( endpoints, { authRequired = false, option ={} })=>{
                 error : resp.status===401 ? "Unauthorized" : "Forbidden",
                 status : resp.status,
             };
+        
 
         }
+            if([500].includes(resp.status)){
+                const text = await resp.text()
+                console.log(text )
+            }
         if(resp.status=== 400){
             const json = await resp.json().catch(()=>null);
+            console.log(json)
             return {
                 error : json?.message || "Bad Request",
                 status : resp.status,
@@ -57,13 +63,13 @@ export const login = (username,password) =>{
     }});
 }
 
-export const signup = (name,password,email) =>{
-    return apiFetch("/api/auth/signup",{
+export const signup = ({username,password,email}) =>{
+    return apiFetch("/api/auth/signUp",{
         authRequired : false,
         option : {method :"POST",
         headers : {
             "Content-Type" : "application/json", },
-        body : JSON.stringify({name,password,email}),
+        body : JSON.stringify({username,password,email}),
     }});
 }
 export const refreshToken = () =>{

@@ -11,9 +11,9 @@ import lombok.Setter;
 @RequiredArgsConstructor
 public class UserDto {
     private long id;
-    private String name ;
+    private String username ;
     private String  email;
-    private  String userToken;
+    private  String token;
 
 
 

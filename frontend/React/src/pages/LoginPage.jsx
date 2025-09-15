@@ -6,12 +6,12 @@ import PageLayout from "../components/PageLayout";
 import styles from "../assets/Page.module.css";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log("Logging in:", { email, password });
+    console.log("Logging in:", { username, password });
   };
 
   return (
@@ -20,11 +20,12 @@ const LoginPage = () => {
         <h2>Login</h2>
         <form onSubmit={handleLogin} className={styles.form}>
           <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter email"
+            label="User Name"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter username"
+            required = {true}
           />
           <Input
             label="Password"
@@ -32,6 +33,7 @@ const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter password"
+            required={true}
           />
           <Button type="submit">Login</Button>
         </form>
