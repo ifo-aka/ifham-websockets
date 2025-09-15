@@ -3,8 +3,25 @@ import PageLayout from "../components/PageLayout";
 import styles from "../assets/ChatPage.module.css";
 
 const ChatPage = () => {
+  const myId =2;
+
   const [messages, setMessages] = useState([
     { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
+    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
+    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
+    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
+    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
+    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
+    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
+    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
+    {id : 2, sender :"me",text:"hello good to see you !" },
   ]);
   const [newMessage, setNewMessage] = useState("");
 

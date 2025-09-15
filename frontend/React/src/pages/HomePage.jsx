@@ -2,12 +2,13 @@
 import PageLayout from "../components/PageLayout";
 import Button from "../components/Button";
 import styles from "../assets/HomePage.module.css";
+import Card from "../components/Card";
 
 const HomePage = () => {
   return (
     <PageLayout>
       <section className={styles.hero}>
-        <h1 className={styles.title}>🚀 Welcome to WebSocket Demo</h1>
+        <h1 className={styles.title}>🚀 Welcome to WebSocket</h1>
         <p className={styles.subtitle}>
           Real-time chat, authentication, and modern UI — built with React.
         </p>
@@ -18,18 +19,35 @@ const HomePage = () => {
       </section>
 
       <section className={styles.features}>
-        <div className={styles.card}>
-          <h3>⚡ Fast Authentication</h3>
-          <p>Login & Signup with secure flows using modular components.</p>
-        </div>
-        <div className={styles.card}>
-          <h3>💬 Real-time Chat</h3>
-          <p>Experience instant messaging powered by WebSockets.</p>
-        </div>
-        <div className={styles.card}>
-          <h3>🎨 Clean UI</h3>
-          <p>Styled with modular CSS for a modern, scalable design.</p>
-        </div>
+        <Card
+         details=
+         {
+          {
+            title:"⚡ Fast Authentication"
+          ,info:  "Login & Signup with secure flows using modular components."
+          }
+          } />
+                <Card
+         details=
+         {
+          {
+            title:"💬 Real-time Chat"
+          ,info:  "Experience instant messaging powered by WebSockets."
+          }
+          } />
+             
+          <Card
+         details=
+         {
+          {
+            title:"🎨 Clean UI"
+          ,info:  "Styled with modular CSS for a modern, scalable design."
+          }
+          } />
+
+        
+        
+        
       </section>
     </PageLayout>
   );

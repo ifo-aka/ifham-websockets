@@ -1,4 +1,4 @@
-package com.ifham.customException;
+package com.WebSockets.SpringBoot.customException;
 
 public class UserNotFoundException extends  RuntimeException{
     public UserNotFoundException(String msg){

@@ -1,6 +1,7 @@
 // src/components/Header.jsx
 import NavLink from "./NavLink";
 import styles from "../assets/Header.module.css";
+const msgCount = 1;
 
 
 const Header = () => {
@@ -8,10 +9,10 @@ const Header = () => {
     <header className={styles.header}>
       <nav>
         <ul className={styles.navList}>
-          <li><NavLink to="/">Home</NavLink></li>
-          <li><NavLink to="/login">Login</NavLink></li>
-          <li><NavLink to="/signup">Signup</NavLink></li>
-          <li><NavLink to="/chat">Chat</NavLink></li>
+          <li className={styles.list}><NavLink to="/">Home</NavLink></li>
+          <li className={styles.list}><NavLink to="/login">Login</NavLink></li>
+          <li className={styles.list}><NavLink to="/signup">Signup</NavLink></li>
+          <li className={styles.list}><NavLink to="/chat">Chat</NavLink>{msgCount >0 && <div className={styles.notification}>{msgCount}</div>}  </li>
         </ul>
       </nav>
     </header>
