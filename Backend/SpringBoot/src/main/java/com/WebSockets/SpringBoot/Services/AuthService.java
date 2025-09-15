@@ -29,7 +29,7 @@ public class AuthService {
     }
 
     public UserDto login(LoginRequestModel requestModel) {
-        UserEntity user = userRepository.findByEmail(requestModel.getEmail())
+        UserEntity user = userRepository.findByUsername(requestModel.getUsername())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(requestModel.getPassword(), user.getPassword())) {
@@ -40,19 +40,19 @@ public class AuthService {
         tokenService.createAndSaveRefreshToken(user);
 
         // create access token to return to client
-        String accessToken = jwtService.generateAccessToken(user.getEmail());
+        String accessToken = jwtService.generateAccessToken(user.getUsername());
 
-        return new UserDto(user.getId(), user.getName(), user.getEmail(), accessToken);
+        return new UserDto(user.getId(), user.getUsername(), user.getEmail(), accessToken);
     }
 
     public UserDto signUp(@Valid SignUpRequestModel request) {
-        userRepository.findByEmail(request.getEmail())
+        userRepository.findByUsername(request.getEmail())
                 .ifPresent(u -> {
                     throw new RuntimeException("Email already exists, please login instead");
                 });
 
         UserEntity entity = new UserEntity();
-        entity.setName(request.getName());
+        entity.setUsername(request.getName());
         entity.setEmail(request.getEmail());
         entity.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -62,8 +62,8 @@ public class AuthService {
         tokenService.createAndSaveRefreshToken(saved);
 
         // Return only access token to client
-        String accessToken = jwtService.generateAccessToken(saved.getEmail());
+        String accessToken = jwtService.generateAccessToken(saved.getUsername());
 
-        return new UserDto(saved.getId(), saved.getName(), saved.getEmail(), accessToken);
+        return new UserDto(saved.getId(), saved.getUsername(), saved.getEmail(), accessToken);
     }
 }

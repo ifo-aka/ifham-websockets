@@ -13,16 +13,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 @RestControllerAdvice
-public class ExceptionHandlerGlobal {
+public class ExceptionHandlerGlobal  {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<APIResponse<Map<String,String>>> handleValidationException(MethodArgumentNotValidException ex){
-        Map<String ,String> errors = new HashMap<>();
+    public ResponseEntity<APIResponse<Map<String, String>>> handleValidationException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(e ->
                 errors.put(e.getField(), e.getDefaultMessage())
         );
         return ResponseEntity.badRequest()
-                .body(new APIResponse<>(false, "Fields are not valid", errors));
+                .body(new APIResponse<>(false, "Validation failed", errors));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -36,19 +36,24 @@ public class ExceptionHandlerGlobal {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<APIResponse<String>> duplicateViolationException(DataIntegrityViolationException ex){
+    public ResponseEntity<APIResponse<String>> duplicateViolationException(DataIntegrityViolationException ex) {
         String message = ex.getMessage();
-        if (message != null && message.contains("user.email")) {
+        if (message != null && message.contains("email")) {
             return ResponseEntity.badRequest()
                     .body(new APIResponse<>(false, "Email already exists", null));
         }
+        if (message != null && message.contains("username")) {
+            return ResponseEntity.badRequest()
+                    .body(new APIResponse<>(false, "Username is already in use", null));
+        }
         return ResponseEntity.badRequest()
-                .body(new APIResponse<>(false, "Data Integrity violation", message));
+                .body(new APIResponse<>(false, "Data integrity violation", null));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIResponse<String>> handleOtherExceptions(Exception ex) {
+        ex.printStackTrace(); // Or use a logger
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new APIResponse<>(false, ex.getMessage(), null));
+                .body(new APIResponse<>(false, "Something went wrong on the server", null));
     }
 }

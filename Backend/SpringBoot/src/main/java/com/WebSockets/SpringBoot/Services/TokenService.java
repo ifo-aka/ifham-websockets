@@ -15,7 +15,7 @@ public class TokenService {
     private final JwtService jwtService;
 
     public void createAndSaveRefreshToken(UserEntity user) {
-        String refresh = jwtService.generateRefreshToken(user.getEmail());
+        String refresh = jwtService.generateRefreshToken(user.getUsername());
         user.setRefreshToken(refresh);
         // compute expiry using jwtService's refreshExpiration (millis)
         user.setRefreshTokenExpiry(LocalDateTime.now().plusNanos(jwtService.getRefreshExpiration() * 1_000_000L));
@@ -23,7 +23,7 @@ public class TokenService {
     }
 
     public boolean isRefreshTokenValidForUser(String email) {
-        UserEntity user = repository.findByEmail(email)
+        UserEntity user = repository.findByUsername(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         String stored = user.getRefreshToken();

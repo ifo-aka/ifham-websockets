@@ -35,23 +35,23 @@ public class AuthController {
     }
 
     // Client calls this when access token expired (client sends the expired access token)
-    @PostMapping("/refresh")
+    @GetMapping("/refresh")
     public APIResponse<Map<String,String>> refreshToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return new APIResponse<>(false, "No token provided", null);
         }
         String accessToken = authHeader.substring(7);
-        String email = jwtService.extractUsernameAllowExpired(accessToken);
+        String username = jwtService.extractUsernameAllowExpired(accessToken);
 
-        if (email == null) {
+        if (username == null) {
             return new APIResponse<>(false, "Invalid token", null);
         }
 
-        if (!tokenService.isRefreshTokenValidForUser(email)) {
+        if (!tokenService.isRefreshTokenValidForUser(username)) {
             return new APIResponse<>(false, "No valid refresh token on server", null);
         }
 
-        String newAccess = jwtService.generateAccessToken(email);
+        String newAccess = jwtService.generateAccessToken(username);
 
         Map<String, String> body = Map.of("accessToken", newAccess);
         return new APIResponse<>(true, "Access token refreshed", body);

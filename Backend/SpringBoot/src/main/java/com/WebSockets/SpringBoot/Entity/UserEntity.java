@@ -15,25 +15,34 @@ import java.time.LocalDateTime;
 @Setter
 public class UserEntity {
     @Id
-    @Column (name = "id")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @NotBlank(message = "email is required")
-    @Column(name = "email",unique = true,nullable = false)
-    @Email(message = "Please provide valid email(e.g : example@gmail.com")
-     private String  email;
 
-    @Column(nullable = false)
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email (e.g: example@gmail.com)")
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
+
     @NotBlank(message = "Password is required")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{5,}$")
+    @Pattern(
+            regexp = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{5,}$",
+            message = "Password must be at least 5 characters, contain 1 digit, 1 lowercase and 1 uppercase letter"
+    )
+    @Column(nullable = false)
     private String password;
-   @NotBlank(message = "name is required.")
-   @Column(name = "name")
-    private String name;
 
-    @Column(name = "refreshToken", length = 500)
+    @NotBlank(message = "Username is required")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])[A-Za-z0-9_-]{5,12}$",
+            message = "Username must be 5–12 characters long, contain letters, and may include numbers, '_' or '-'"
+    )
+    @Column(name = "username", unique = true, nullable = false)
+    private String username;
+
+    @Column(name = "refreshToken", length = 1000)
     private String refreshToken;
+
     @Column(name = "exp")
     private LocalDateTime refreshTokenExpiry;
-
 }
