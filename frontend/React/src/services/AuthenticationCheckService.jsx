@@ -1,10 +1,13 @@
 import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 
 
 const AuthenticationCheckService =({children})=>{
     const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const authChecked = useSelector((state) => state.auth.authChecked);
     console.log(isAuthenticated)
+    console.log(authChecked);
+    
 
   
   if (!authChecked) {

@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import PageLayout from "../components/PageLayout";
 import styles from "../assets/Page.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import { signupThunk ,setShowSpinner} from "../store/slices/authSlics";
+import { signupThunk ,setShowSpinner,setAuthChecked,setAuthentication} from "../store/slices/authSlics";
 import Container from "../components/Container";
+import {  useNavigate } from "react-router-dom";
 
 const SignupPage = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { showSpinner, isAuthenticated, userObject } = useSelector((s) => s.auth);
 
@@ -108,14 +110,50 @@ const SignupPage = () => {
       password: formData.password
     }
   dispatch(setShowSpinner(true));
+  setAuthChecked(false);
     dispatch(signupThunk(obj)).then((response ) => {
       console.log("Signup response:", response);
-    }
-  )
+      if(response.payload?.success == true){
+        dispatch(setShowSpinner(false));
+        dispatch(setAuthChecked(true));
+        dispatch(setAuthentication(true));
+      }
+      if (response.payload?.success == false) {
+        dispatch(setShowSpinner(false));
+        dispatch(setAuthChecked(true));
+        const data = response.payload?.data;
+        if(data.username){
+          setError( data.username)
+          setTimeout(() => {
+            setError("")
+          }, 5000);
+          return
+        }else if(data.email){
+          setError( data.email)
+                   setTimeout(() => {
+            setError("")
+          }, 5000);
+          return
+        }
+        else if(data.password){
+          setError( data.password)
+                   setTimeout(() => {
+            setError("")
+          }, 5000);
+          return
+        }
+        setError( "Signup failed ❌");
+      }
+    });
 
     console.log("✅ Signing up:", obj);
-    setError("");
+   
   };
+  useEffect(()=>{
+     if(isAuthenticated){
+      navigate("/")
+     }
+  },[isAuthenticated])
 
   return (
     <Container>

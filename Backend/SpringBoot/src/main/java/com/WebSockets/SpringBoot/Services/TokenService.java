@@ -1,6 +1,8 @@
 package com.WebSockets.SpringBoot.Services;
 
+import com.WebSockets.SpringBoot.DTOS.UserDto;
 import com.WebSockets.SpringBoot.Entity.UserEntity;
+import com.WebSockets.SpringBoot.Models.APIResponse;
 import com.WebSockets.SpringBoot.Repository.UserRepository;
 import com.WebSockets.SpringBoot.customException.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 public class TokenService {
     private final UserRepository repository;
     private final JwtService jwtService;
+
 
     public void createAndSaveRefreshToken(UserEntity user) {
         String refresh = jwtService.generateRefreshToken(user.getUsername());
@@ -39,5 +42,13 @@ public class TokenService {
         user.setRefreshToken(null);
         user.setRefreshTokenExpiry(null);
         repository.save(user);
+    }
+
+    public UserDto createNewAccessToken(String username){
+
+        String newAccess = jwtService.generateAccessToken(username);
+        UserEntity entity = repository.findByUsername(username).orElseThrow(()->new UserNotFoundException("user not found"));
+
+        return new UserDto(entity.getId(),entity.getUsername(),entity.getEmail(),newAccess);
     }
 }

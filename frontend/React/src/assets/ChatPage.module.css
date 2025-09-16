@@ -1,24 +1,26 @@
 .chatContainer {
   display: flex;
-  height: 80vh;
-  border-radius: 12px;
+  height: 85vh;
+  border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  font-family: "Segoe UI", Roboto, sans-serif;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 220px;
-  background: linear-gradient(180deg, #4a90e2, #357abd);
+  width: 250px;
+  background: linear-gradient(180deg, #6c5ce7, #341f97);
   color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
 }
 
-.sidebar h3 {
-  margin-bottom: 15px;
-  font-size: 1.2rem;
+.sidebar h2 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
 }
 
 .sidebar ul {
@@ -27,15 +29,16 @@
 }
 
 .sidebar li {
-  padding: 10px;
-  margin-bottom: 8px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
   cursor: pointer;
-  border-radius: 6px;
-  transition: background 0.2s;
+  border-radius: 10px;
+  transition: all 0.2s;
 }
 
 .sidebar li:hover {
   background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
 }
 
 .activeChat {
@@ -48,22 +51,25 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f9f9fb;
+  background: #e5ddd5; /* WhatsApp background */
+  border-left: 1px solid #ccc;
+  position: relative;
 }
 
-/* Header */
+/* Chat Header */
 .chatHeader {
   background: #fff;
-  padding: 15px;
-  border-bottom: 1px solid #ddd;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ccc;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 500;
 }
 
 .status {
   font-size: 0.9rem;
-  color: green;
+  color: #00c853;
 }
 
 /* Messages */
@@ -73,61 +79,132 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  scroll-behavior: smooth;
 }
 
+/* Message Bubble */
 .message {
-  padding: 10px 15px;
-  border-radius: 18px;
   max-width: 70%;
-  word-wrap: break-word;
+  padding: 10px 14px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
+/* Sent messages */
 .myMessage {
   align-self: flex-end;
-  background: #4a90e2;
-  color: white;
+  background: #dcf8c6;
+  color: #000;
   border-bottom-right-radius: 4px;
 }
 
+/* Received messages */
 .botMessage {
   align-self: flex-start;
-  background: #e5e5ea;
-  color: black;
+  background: #fff;
+  color: #000;
   border-bottom-left-radius: 4px;
+}
+
+/* Bubble tail */
+.myMessage::after {
+  content: "";
+  position: absolute;
+  right: -7px;
+  bottom: 10px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-left: 7px solid #dcf8c6;
+  border-bottom: 7px solid transparent;
+}
+
+.botMessage::after {
+  content: "";
+  position: absolute;
+  left: -7px;
+  bottom: 10px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-right: 7px solid #fff;
+  border-bottom: 7px solid transparent;
+}
+
+/* Username on top */
+.messageSender {
+  font-weight: bold;
+  font-size: 0.8rem;
+  color: #075e54;
+  margin-bottom: 4px;
+}
+
+/* Message content */
+.messageContent {
+  font-size: 0.95rem;
+  line-height: 1.3rem;
+}
+
+/* Timestamp */
+.messageTime {
+  align-self: flex-end;
+  font-size: 0.7rem;
+  color: #555;
+  margin-top: 4px;
 }
 
 /* Input Area */
 .inputArea {
   display: flex;
-  padding: 10px;
+  padding: 15px 20px;
   background: #fff;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #ccc;
 }
 
 .inputArea input {
   flex: 1;
-  padding: 12px;
+  padding: 14px 18px;
   border: none;
   outline: none;
-  border-radius: 20px;
+  border-radius: 25px;
   background: #f1f1f1;
-  margin-right: 10px;
+  margin-right: 12px;
+  font-size: 1rem;
 }
 
 .inputArea button {
   height: 50px;
   width: 50px;
   border: none;
-  background: #4a90e2;
+  background: #6c5ce7;
   color: white;
-  font-size: 1.2rem;
-  
-  border-radius: 100%;
+  font-size: 1.3rem;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .inputArea button:hover {
-  background: #357abd;
+  background: #341f97;
+}
+/* Sliding animation for messages */
+.slide-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.slide-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.2s ease-out;
+}
+.slide-exit {
+  opacity: 1;
+}
+.slide-exit-active {
+  opacity: 0;
+  transition: all 0.2s ease-out;
 }

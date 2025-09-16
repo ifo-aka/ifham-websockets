@@ -1,141 +1,174 @@
-import { createSlice,createAsyncThunk } from "@reduxjs/toolkit";
-//import login , signup , refresh  api from DBUtils
-import { login as dbLogin , signup as dbSignup, refreshToken as dbRefreshToken} from "../../utils/DBUtils";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+// import login , signup , refresh  api from DBUtils
+import {
+  login as dbLogin,
+  signup as dbSignup,
+  refreshToken as dbRefreshToken,
+} from "../../utils/DBUtils";
 
+// ====================== Async Thunks ======================
 
-export const signupThunk = createAsyncThunk("api/auth/signup", async (userData, { dispatch ,rejectWithValue}) => {
-    dispatch(setShowSpinner(true));
+export const signupThunk = createAsyncThunk(
+  "api/auth/signup",
+  async (userData, { rejectWithValue }) => {
     try {
-        console.log(userData);
-        
-        const response = await dbSignup(userData);
-        dispatch(setShowSpinner(false));
-        if(!response.success){
-            return rejectWithValue(response.error);
-        }
-        return response;
+      const response = await dbSignup(userData);
+      if (!response.success) {
+        return rejectWithValue(response);
+      }
+      return response;
     } catch (error) {
-        dispatch(setShowSpinner(false));
-        return rejectWithValue("Network error or server is unreachable.");
+      return rejectWithValue("Network error or server is unreachable.");
     }
-});
-export const refreshTokenThunk = createAsyncThunk("api/auth/refresh", async (_, { dispatch ,rejectWithValue}) => {
-    dispatch(setShowSpinner(true));
-    try {
-        const response = await dbRefreshToken();
-        dispatch(setShowSpinner(false));
-        if(!response.success){
-            return rejectWithValue(response.error);
-        }
-        return response;
-    } catch (error) {
-        dispatch(setShowSpinner(false));
-        return rejectWithValue("Network error or server is unreachable.");
-    }
-});
+  }
+);
 
+export const loginThunk = createAsyncThunk(
+  "api/auth/login",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const resp = await dbLogin(credentials);
+      if (!resp.success) {
+        return rejectWithValue(resp);
+      }
+      return resp;
+    } catch (error) {
+      return rejectWithValue("Network error or server is unreachable.");
+    }
+  }
+);
+
+export const refreshTokenThunk = createAsyncThunk(
+  "api/auth/refresh",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await dbRefreshToken();
+      if (!response.success) {
+        return rejectWithValue(response);
+      }
+      return response;
+    } catch (error) {
+      return rejectWithValue("Network error or server is unreachable.");
+    }
+  }
+);
+
+// ====================== Slice ======================
 
 const authSlice = createSlice({
-    name : "auth",
-    initialState : {
-        token: null,
-        isAuthenticated: false,
-        authChecked: false,
-        showSpinner: false,
-        userObject: {
-            id: null,
-            username: null,
-            email: null,
-        }
+  name: "auth",
+  initialState: {
+    token: localStorage.getItem("token") || null,
+    isAuthenticated: !!localStorage.getItem("token"),
+    authChecked: !!localStorage.getItem("token"),
+    showSpinner: false,
+    userObject: {
+      id: "",
+      username: "",
+      email: "",
     },
-    reducers : {
-        logout : (state) =>{
-            state.token = null;
-            state.isAuthenticated = false;
-            state.userObject = {id : null, username : null, email : null};
-            localStorage.removeItem("token");
-        },
-        setShowSpinner : (state,action) =>{
-            state.showSpinner = !!action.payload;
-        },
-        setAuthChecked : (state,action) =>{
-            state.authChecked = !!action.payload;
-        },
-        setUserObject : (state,action) =>{
-            state.userObject = {...state.userObject,...action.payload};
-        },
-        setToken : (state,action) =>{
-            state.token = action.payload;
-            state.isAuthenticated = !!action.payload;
-        },
+  },
+  reducers: {
+    logout: (state) => {
+      state.token = null;
+      state.isAuthenticated = false;
+      state.authChecked = false;
+      state.userObject = { id: null, username: null, email: null };
+      localStorage.removeItem("token");
     },
-    extraReducers : (builder) =>{
-        builder
-            .addCase(login.fulfilled, (state, action) =>{
-                const {id,username,email,token} = action.payload.data;
-                state.token = token;
-                state.isAuthenticated = true;
-                state.userObject = {id,username,email};
-                localStorage.setItem("token", token);
-            })
-            .addCase(login.rejected, (state, action) =>{
-                state.token = null;
-                state.isAuthenticated = false;
-                state.userObject = {id: null, username: null, email: null};
-                localStorage.removeItem("token");
-            })
-            .addCase(login.pending, (state) =>{
-                state.showSpinner = true;
-            })
-            .addCase(signupThunk.fulfilled, (state, action) =>{
-                 const {id,username,email,token} = action.payload.data;
-                 console.log(action.payload.data);
-                 state.authChecked= true;
-                state.token = token;
-                state.isAuthenticated = true;
-                state.userObject = {id,username,email};
-                localStorage.setItem("token", token);
-            })
-            .addCase(signupThunk.rejected, (state, action) =>{
-                state.token = null;
-                state.isAuthenticated = false;
-                state.userObject = {id: null, username: null, email: null};
-                localStorage.removeItem("token");
-            })
-            .addCase(signupThunk.pending, (state) =>{
-                state.showSpinner = true;
-            })
-            .addCase(refreshTokenThunk.fulfilled, (state, action) =>{
-                 const {id,username,email,token} = action.payload.data;
-                state.token = action.payload.token;
-                state.isAuthenticated = true;
-                state.userObject = action.payload.user;
-                localStorage.setItem("token", action.payload.token);
-            })
-            .addCase(refreshTokenThunk.rejected, (state, action) =>{
-                state.token = null;
-                state.isAuthenticated = false;
-                state.userObject = {id: null, username: null, email: null};
-                localStorage.removeItem("token");
-            })
-            .addCase(refreshTokenThunk.pending, (state) =>{
-                state.showSpinner = true;
-            });
+    setShowSpinner: (state, action) => {
+      state.showSpinner = !!action.payload;
     },
-});
+    setAuthentication: (state, action) => {
+      state.isAuthenticated = !!action.payload;
+    },
+    setAuthChecked: (state, action) => {
+      state.authChecked = !!action.payload;
+    },
+    setUserObject: (state, action) => {
+      state.userObject = { ...state.userObject, ...action.payload };
+    },
+    setToken: (state, action) => {
+      state.token = action.payload;
+      state.isAuthenticated = !!action.payload;
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      // LOGIN
+      .addCase(loginThunk.fulfilled, (state, action) => {
+        const { id, username, email, token } = action.payload.data;
+        state.token = token;
+        state.isAuthenticated = true;
+        state.authChecked = true;
+        state.userObject = { id, username, email };
+        localStorage.setItem("token", token);
+        state.showSpinner = false;
+      })
+      .addCase(loginThunk.rejected, (state) => {
+        state.token = null;
+        state.isAuthenticated = false;
+        state.authChecked = false;
+        state.userObject = { id: null, username: null, email: null };
+        localStorage.removeItem("token");
+        state.showSpinner = false;
+      })
+      .addCase(loginThunk.pending, (state) => {
+        state.showSpinner = true;
+      })
 
-//===========================Async Thunks===================================
-export const login = createAsyncThunk("auth/login", async (credentials, { dispatch }) => {
-    dispatch(setShowSpinner(true));
-    try {
-        const response = await dbLogin(credentials);
-        dispatch(setShowSpinner(false));
-        return response;
-    } catch (error) {
-        dispatch(setShowSpinner(false));
-        throw error;
-    }
+      // SIGNUP
+      .addCase(signupThunk.fulfilled, (state, action) => {
+        const { id, username, email, token } = action.payload.data;
+        state.token = token;
+        state.isAuthenticated = true;
+        state.authChecked = true;
+        state.userObject = { id, username, email };
+        localStorage.setItem("token", token);
+        state.showSpinner = false;
+      })
+      .addCase(signupThunk.rejected, (state) => {
+        state.token = null;
+        state.isAuthenticated = false;
+        state.authChecked = false;
+        state.userObject = { id: null, username: null, email: null };
+        localStorage.removeItem("token");
+        state.showSpinner = false;
+      })
+      .addCase(signupThunk.pending, (state) => {
+        state.showSpinner = true;
+      })
+
+      // REFRESH TOKEN
+      .addCase(refreshTokenThunk.fulfilled, (state, action) => {
+        const { id, username, email, token } = action.payload.data;
+        state.token = token;
+        state.isAuthenticated = true;
+        state.authChecked = true;
+        state.userObject = { id, username, email };
+        localStorage.setItem("token", token);
+        state.showSpinner = false;
+      })
+      .addCase(refreshTokenThunk.rejected, (state) => {
+        state.token = null;
+        state.isAuthenticated = false;
+        state.authChecked = false;
+        state.userObject = { id: null, username: null, email: null };
+        localStorage.removeItem("token");
+        state.showSpinner = false;
+      })
+      .addCase(refreshTokenThunk.pending, (state) => {
+        state.showSpinner = true;
+      });
+  },
 });
 
 export default authSlice.reducer;
-export const { logout, setShowSpinner, setAuthChecked, setUserObject, setToken } = authSlice.actions;
+export const {
+  logout,
+  setShowSpinner,
+  setAuthChecked,
+  setUserObject,
+  setToken,
+  setAuthentication,
+} = authSlice.actions;

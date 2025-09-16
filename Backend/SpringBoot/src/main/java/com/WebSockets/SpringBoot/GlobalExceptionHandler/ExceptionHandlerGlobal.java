@@ -2,7 +2,9 @@ package com.WebSockets.SpringBoot.GlobalExceptionHandler;
 
 import com.WebSockets.SpringBoot.Models.APIResponse;
 
+import com.WebSockets.SpringBoot.customException.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import org.hibernate.service.UnknownServiceException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,14 +42,18 @@ public class ExceptionHandlerGlobal  {
         String message = ex.getMessage();
         if (message != null && message.contains("email")) {
             return ResponseEntity.badRequest()
-                    .body(new APIResponse<>(false, "Email already exists", null));
+                    .body(new APIResponse<>(false, "validation failed", "Email already exists"));
         }
         if (message != null && message.contains("username")) {
             return ResponseEntity.badRequest()
-                    .body(new APIResponse<>(false, "Username is already in use", null));
+                    .body(new APIResponse<>(false, "validation failed", "Username is already is use"));
         }
         return ResponseEntity.badRequest()
-                .body(new APIResponse<>(false, "Data integrity violation", null));
+                .body(new APIResponse<>(false, "validation failed", ex.getLocalizedMessage()));
+    }
+    @ExceptionHandler(UserNotFoundException.class)
+    public  ResponseEntity<APIResponse<String>> handleUserNotFoundException(UserNotFoundException ex){
+        return ResponseEntity.badRequest().body(new APIResponse<>(false," validation Failed",ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

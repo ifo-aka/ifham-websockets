@@ -11,6 +11,7 @@ import AuthenticationCheckService from "./services/AuthenticationCheckService";
 import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
+import AppContextProvider from "./context/AppContextProvider";
 
 function AppRoutes() {
 
@@ -48,9 +49,11 @@ function AppRoutes() {
   return <RouterProvider router={router} />;
 }
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+ 
     <Provider store={store}>
+<AppContextProvider>
       <AppRoutes />
+      </AppContextProvider>
     </Provider>
-  </React.StrictMode>
+ 
 );

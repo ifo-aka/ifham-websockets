@@ -1,93 +1,112 @@
-import { useState } from "react";
-import PageLayout from "../components/PageLayout";
-import styles from "../assets/ChatPage.module.css";
+import { useState, useEffect, useContext, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { reset } from "../store/slices/notificationSlice";
+import { AppContext } from "../context/AppContext";
 import Container from "../components/Container";
+import styles from "../assets/ChatPage.module.css";
+import { CSSTransition,TransitionGroup } from "react-transition-group";
 
 const ChatPage = () => {
-  const myId =2;
+  const { messages } = useSelector((state) => state.chat);
+  const { userObject } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const myName = userObject?.username || "Guest";
+  const { stompClient } = useContext(AppContext);
 
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-    { id: 1, sender: "bot", text: "Welcome to the chat! 🚀" },
-    {id : 2, sender :"me",text:"hello good to see you !" },
-  ]);
   const [newMessage, setNewMessage] = useState("");
+    const messagesEndRef = useRef(null); // ✅ ref for scrolling
+
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Reset notifications when chat is focused
+  useEffect(() => {
+    const handleFocus = () => dispatch(reset());
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [dispatch]);
 
   const handleSend = (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !stompClient.current) return;
 
-    const message = {
-      id: Date.now(),
-      sender: "me",
-      text: newMessage,
-    };
+    const date = new Date().toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
 
-    setMessages([...messages, message]);
+    const chatMsg = { from: myName, content: newMessage, time: date };
+    stompClient.current.send("/app/sendMessage", {}, JSON.stringify(chatMsg));
     setNewMessage("");
   };
+  const handleMsgOnclick= (event)=>{
+    event.preventDefault();
+    console.log(event)
+  
+  }
 
   return (
-    < Container>
+    <Container>
       <div className={styles.chatContainer}>
         {/* Sidebar */}
         <aside className={styles.sidebar}>
-          <h3>Chats</h3>
+          <h2>Chats</h2>
           <ul>
             <li className={styles.activeChat}>General</li>
             <li>Support</li>
             <li>Friends</li>
+            <li>Work</li>
+            <li>Random</li>
+            <li>Settings</li>
           </ul>
         </aside>
 
         {/* Main Chat Area */}
         <section className={styles.chatArea}>
-          {/* Chat Header */}
           <header className={styles.chatHeader}>
-            <h2>General Chat</h2>
-            <span className={styles.status}>● Online</span>
+            <div>
+              <h2>General Chat</h2>
+              <span className={styles.status}>● Online</span>
+            </div>
+            <p>{myName}</p>
           </header>
 
-          {/* Messages */}
           <div className={styles.messages}>
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`${styles.message} ${
-                  msg.sender === "me" ? styles.myMessage : styles.botMessage
-                }`}
-              >
-                {msg.text}
+            {messages.map((msg, i) => (
+                <CSSTransition key={i} timeout={200} classNames="slide">
+                <div
+                  className={`${styles.message} ${
+                    msg.from === myName ? styles.myMessage : styles.botMessage
+                  }`} onClick={handleMsgOnclick}
+                >
+              
+                <span className={styles.messageSender}>{msg.from}</span>
+                <span className={styles.messageContent}>{msg.content}</span>
+                <span className={styles.messageTime}>{msg.time}</span>
               </div>
+              </CSSTransition>
             ))}
+                <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Box */}
           <form className={styles.inputArea} onSubmit={handleSend}>
             <input
               type="text"
-              placeholder="Type a message..."
+              placeholder="Type your message..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
             />
-            <button type="submit">➤</button>
+            <button type="submit" disabled={!stompClient.current}>
+              ➤
+            </button>
           </form>
         </section>
       </div>
-   </Container>
+    </Container>
   );
 };
 

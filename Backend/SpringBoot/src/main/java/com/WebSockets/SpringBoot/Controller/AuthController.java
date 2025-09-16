@@ -1,6 +1,7 @@
 package com.WebSockets.SpringBoot.Controller;
 
 import com.WebSockets.SpringBoot.DTOS.UserDto;
+import com.WebSockets.SpringBoot.Entity.UserEntity;
 import com.WebSockets.SpringBoot.Models.APIResponse;
 import com.WebSockets.SpringBoot.Models.LoginRequestModel;
 import com.WebSockets.SpringBoot.Models.SignUpRequestModel;
@@ -36,7 +37,7 @@ public class AuthController {
 
     // Client calls this when access token expired (client sends the expired access token)
     @GetMapping("/refresh")
-    public APIResponse<Map<String,String>> refreshToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public APIResponse<UserDto> refreshToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return new APIResponse<>(false, "No token provided", null);
         }
@@ -50,10 +51,12 @@ public class AuthController {
         if (!tokenService.isRefreshTokenValidForUser(username)) {
             return new APIResponse<>(false, "No valid refresh token on server", null);
         }
+     UserDto  dto=   tokenService.createNewAccessToken(username);
 
-        String newAccess = jwtService.generateAccessToken(username);
 
-        Map<String, String> body = Map.of("accessToken", newAccess);
-        return new APIResponse<>(true, "Access token refreshed", body);
+
+
+
+        return new APIResponse<>(true, "Access token refreshed", dto);
     }
 }

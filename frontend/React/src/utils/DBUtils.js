@@ -1,3 +1,5 @@
+import { data } from "react-router-dom";
+
 const BASE_URL = "http://localhost:8080";
 const getToken=()=>localStorage.getItem("token")
 
@@ -10,7 +12,11 @@ const authHeaders =()=>{
 const apiFetch = async ( endpoints, { authRequired = false, option ={} })=>{
     const token = getToken();
     if(!token  && authRequired ){
-        throw new Error("No token found");
+        return {
+            success :false,
+            message : "no token found",
+            data: null,
+        }
     }
     try{
         const resp = await fetch(`${BASE_URL}${endpoints}`, {
@@ -30,18 +36,11 @@ const apiFetch = async ( endpoints, { authRequired = false, option ={} })=>{
         
 
         }
-            if([500].includes(resp.status)){
-                const text = await resp.text()
-                console.log(text )
-            }
+       
         if(resp.status=== 400){
             const json = await resp.json().catch(()=>null);
             console.log(json)
-            return {
-                error : json?.message || "Bad Request",
-                status : resp.status,
-                details : json,
-            };
+            return json;
         }
         return await resp.json();
 
@@ -53,7 +52,7 @@ const apiFetch = async ( endpoints, { authRequired = false, option ={} })=>{
 
 
 //===========================API function ===================================
-export const login = (username,password) =>{
+export const login = ({username,password}) =>{
     return apiFetch("/api/auth/login",{
         authRequired : false,
         option : {method :"POST",

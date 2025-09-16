@@ -37,24 +37,16 @@ public class securityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints (no JWT needed)
-                        .requestMatchers(
-                                "/api/auth/**"
-                             // if you want docs upload open
-                        ).permitAll()
+                        // Public endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll() // 👈 allow WebSocket
 
                         // Protected endpoints
                         .requestMatchers("/auth/check").authenticated()
                         .requestMatchers("/student/**").authenticated()
 
-                        // Optional role-based
-                        //.requestMatchers("/admin/**").hasRole("ADMIN")
-                        //.requestMatchers("/dean/**").hasRole("DEAN")
-
                         .anyRequest().authenticated()
-
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
