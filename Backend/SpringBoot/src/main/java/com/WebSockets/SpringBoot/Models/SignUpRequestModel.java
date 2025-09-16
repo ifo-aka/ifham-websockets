@@ -15,12 +15,13 @@ public class SignUpRequestModel {
     @Email(message = "please ensure your email is valid")
     private String email;
 
+
+
+    private String phonenumber;
+
     @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "Phone is required")
-    @Size(min = 11, max = 11, message = "Phone must be exactly 11 digits")
-    @Pattern(regexp = "^034\\d{8}$", message = "Phone must start with 034 and be 11 digits total")
-    private String phoneNumber;
+
 
 }

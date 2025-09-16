@@ -62,13 +62,13 @@ export const login = ({username,password}) =>{
     }});
 }
 
-export const signup = ({username,password,email}) =>{
+export const signup = (userData) =>{
     return apiFetch("/api/auth/signUp",{
         authRequired : false,
         option : {method :"POST",
         headers : {
             "Content-Type" : "application/json", },
-        body : JSON.stringify({username,password,email}),
+        body : JSON.stringify(userData),
     }});
 }
 export const refreshToken = () =>{

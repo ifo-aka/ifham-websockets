@@ -25,6 +25,7 @@ public class AuthController {
 
     @PostMapping("/signUp")
     public APIResponse<UserDto> signUp(@RequestBody @Valid SignUpRequestModel request) {
+        System.out.println(">>> Incoming phone: " + request.getPhonenumber());
         UserDto dto = authService.signUp(request);
         return new APIResponse<>(true, "User signed successfully", dto);
     }

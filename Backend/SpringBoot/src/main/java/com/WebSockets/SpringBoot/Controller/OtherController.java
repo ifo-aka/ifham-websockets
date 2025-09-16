@@ -18,7 +18,7 @@ public class OtherController {
 
     @GetMapping("/check-phone")
     public APIResponse<String> checkPhone(@RequestParam String phone) {
-        boolean isAvailable=  repository.existByPhoneNumber(phone);
+        boolean isAvailable=  repository.existsByPhonenumber(phone);
         if(isAvailable)
           return  new APIResponse<>(true,"User Available","user exist");
 

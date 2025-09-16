@@ -16,6 +16,7 @@ const SignupPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
   });
@@ -23,10 +24,29 @@ const SignupPage = () => {
   const [error, setError] = useState("");
   const [strength, setStrength] = useState("");
   const [confirmError, setConfirmError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    if (name === "phoneNumber") {
+      // Only allow numbers
+      if (!/^\d*$/.test(value)) {
+        setPhoneError("Phone number must contain only digits");
+        return;
+      }
+      // Enforce max length
+      if (value.length > 11) {
+        setPhoneError("Phone number must be exactly 11 digits");
+        return;
+      }
+      // Must start with 034
+      if (value.length >= 3 && !value.startsWith("034")) {
+        setPhoneError("Phone number must start with 034");
+        return;
+      }
+      setPhoneError("");
+    }
     setFormData({
       ...formData,
       [name]: value,
@@ -35,16 +55,35 @@ const SignupPage = () => {
 
     if (name === "password") {
       evaluateStrength(value);
-
       // reset confirm password error when password changes
       if (formData.confirmPassword) {
         checkConfirmPassword(formData.confirmPassword, value);
       }
     }
-
     if (name === "confirmPassword") {
       checkConfirmPassword(value, formData.password);
     }
+  // Handle Enter key for phone number validation
+if (name === "phoneNumber") {
+  // Keep only digits and trim to 11 max
+  const onlyNums = value.replace(/\D/g, "").slice(0, 11);
+
+  setFormData({
+    ...formData,
+    phoneNumber: onlyNums,
+  });
+
+  // Validation
+  if (onlyNums.length !== 11) {
+    setPhoneError("Phone number must be exactly 11 digits");
+  } else if (!onlyNums.startsWith("034")) {
+    setPhoneError("Phone number must start with 034");
+  } else {
+    setPhoneError("");
+  }
+  return; // stop here
+}
+
   };
 
   const evaluateStrength = (password) => {
@@ -107,8 +146,10 @@ const SignupPage = () => {
     const obj = {
       username : formData.username,
       email: formData.email,
+      phonenumber: formData.phoneNumber,
       password: formData.password
     }
+    console.log("Signup data:", typeof(obj.phoneNumber));
   dispatch(setShowSpinner(true));
   setAuthChecked(false);
     dispatch(signupThunk(obj)).then((response ) => {
@@ -176,6 +217,32 @@ const SignupPage = () => {
             onChange={handleChange}
             placeholder="Enter your email"
           />
+          <Input
+            label="Phone Number"
+            type="text"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            
+            placeholder="Enter your phone number"
+            maxLength={11}
+            inputMode="numeric"
+            pattern="\d*"
+          />
+          {/* Phone validation message */}
+          {(phoneError || formData.phoneNumber) && (
+            <p style={{
+              color: phoneError ? "red" : (/^034\d{8}$/.test(formData.phoneNumber) ? "green" : "red"),
+              marginBottom: "10px",
+              fontSize: "14px"
+            }}>
+              {phoneError
+                ? phoneError
+                : (formData.phoneNumber.length === 11 && formData.phoneNumber.startsWith("034") && /^\d{11}$/.test(formData.phoneNumber))
+                ? "Valid phone number ✅"
+                : "Phone number must start with 034 and be exactly 11 digits"}
+            </p>
+          )}
           <Input
             label="Password"
             type="password"
