@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,6 +40,12 @@ public class UserEntity {
     )
     @Column(name = "username", unique = true, nullable = false)
     private String username;
+
+    @Column(name = "phone_number", nullable = false, unique = true, length = 11)
+    @NotBlank(message = "Phone is required")
+    @Size(min = 11, max = 11, message = "Phone must be exactly 11 digits")
+    @Pattern(regexp = "^034\\d{8}$", message = "Phone must start with 034 and be 11 digits total")
+    private String phoneNumber;
 
     @Column(name = "refreshToken", length = 1000)
     private String refreshToken;

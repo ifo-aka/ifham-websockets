@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 public class ChatMessage {
     private String from;
     private String content;
+    private String to;
     private  String time;
 }
