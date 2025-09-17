@@ -66,6 +66,7 @@ const authSlice = createSlice({
       id: "",
       username: "",
       email: "",
+      phoneNumber: "",
     },
   },
   reducers: {
@@ -97,11 +98,11 @@ const authSlice = createSlice({
     builder
       // LOGIN
       .addCase(loginThunk.fulfilled, (state, action) => {
-        const { id, username, email, token } = action.payload.data;
+        const { id, username, email, token ,phoneNumber} = action.payload.data;
         state.token = token;
         state.isAuthenticated = true;
         state.authChecked = true;
-        state.userObject = { id, username, email };
+        state.userObject = { id, username, email, phoneNumber };
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
@@ -109,7 +110,7 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.authChecked = false;
-        state.userObject = { id: null, username: null, email: null };
+        state.userObject = { id: null, username: null, email: null ,phoneNumber: null};
         localStorage.removeItem("token");
         state.showSpinner = false;
       })
@@ -119,11 +120,11 @@ const authSlice = createSlice({
 
       // SIGNUP
       .addCase(signupThunk.fulfilled, (state, action) => {
-        const { id, username, email, token } = action.payload.data;
+        const { id, username, email, token ,phoneNumber} = action.payload.data;
         state.token = token;
         state.isAuthenticated = true;
         state.authChecked = true;
-        state.userObject = { id, username, email };
+        state.userObject = { id, username, email ,phoneNumber };
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
@@ -131,7 +132,7 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.authChecked = false;
-        state.userObject = { id: null, username: null, email: null };
+        state.userObject = { id: null, username: null, email: null,phoneNumber: null };
         localStorage.removeItem("token");
         state.showSpinner = false;
       })
@@ -141,11 +142,11 @@ const authSlice = createSlice({
 
       // REFRESH TOKEN
       .addCase(refreshTokenThunk.fulfilled, (state, action) => {
-        const { id, username, email, token } = action.payload.data;
+        const { id, username, email, token, phoneNumber } = action.payload.data;
         state.token = token;
         state.isAuthenticated = true;
         state.authChecked = true;
-        state.userObject = { id, username, email };
+        state.userObject = { id, username, email, phoneNumber };
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
@@ -153,7 +154,7 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.authChecked = false;
-        state.userObject = { id: null, username: null, email: null };
+        state.userObject = { id: null, username: null, email: null, phoneNumber: null };
         localStorage.removeItem("token");
         state.showSpinner = false;
       })

@@ -10,18 +10,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/user")
-@RequiredArgsConstructor
+
 public class OtherController {
     private final UserRepository repository;
 
-
+public OtherController(UserRepository repository){
+    this.repository=repository;
+}
 
     @GetMapping("/check-phone")
     public APIResponse<String> checkPhone(@RequestParam String phone) {
-        boolean isAvailable=  repository.existsByPhonenumber(phone);
+        boolean isAvailable=  repository.existsByPhoneNumber(phone);
         if(isAvailable)
           return  new APIResponse<>(true,"User Available","user exist");
 
-       return new APIResponse<>(true,"no user found", "this number does not belongs to any user ");
+       return new APIResponse<>(false,"no user found", "this number does not belongs to any user ");
     }
 }

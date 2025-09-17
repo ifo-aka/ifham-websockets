@@ -42,7 +42,7 @@ public class AuthService {
         // create access token to return to client
         String accessToken = jwtService.generateAccessToken(user.getUsername());
 
-        return new UserDto(user.getId(), user.getUsername(), user.getEmail(),user.getPhonenumber() ,accessToken);
+        return new UserDto(user.getId(), user.getUsername(), user.getEmail(),user.getPhoneNumber() ,accessToken);
     }
 
     public UserDto signUp(@Valid SignUpRequestModel request) {
@@ -55,7 +55,7 @@ public class AuthService {
         entity.setUsername(request.getUsername());
         entity.setEmail(request.getEmail());
         entity.setPassword(passwordEncoder.encode(request.getPassword()));
-        entity.setPhonenumber(request.getPhonenumber());
+        entity.setPhoneNumber(request.getPhonenumber());
 
         UserEntity saved = userRepository.save(entity);
 
@@ -65,6 +65,6 @@ public class AuthService {
         // Return only access token to client
         String accessToken = jwtService.generateAccessToken(saved.getUsername());
 
-        return new UserDto(saved.getId(), saved.getUsername(), saved.getEmail(),saved.getPhonenumber(), accessToken);
+        return new UserDto(saved.getId(), saved.getUsername(), saved.getEmail(),saved.getPhoneNumber(), accessToken);
     }
 }

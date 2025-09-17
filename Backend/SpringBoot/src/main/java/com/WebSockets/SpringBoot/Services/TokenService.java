@@ -49,6 +49,6 @@ public class TokenService {
         String newAccess = jwtService.generateAccessToken(username);
         UserEntity entity = repository.findByUsername(username).orElseThrow(()->new UserNotFoundException("user not found"));
 
-        return new UserDto(entity.getId(),entity.getUsername(),entity.getEmail(),entity.getPhonenumber(),newAccess);
+        return new UserDto(entity.getId(),entity.getUsername(),entity.getEmail(),entity.getPhoneNumber(),newAccess);
     }
 }

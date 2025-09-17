@@ -1,4 +1,4 @@
-import { data } from "react-router-dom";
+
 
 const BASE_URL = "http://localhost:8080";
 const getToken=()=>localStorage.getItem("token")
@@ -19,39 +19,79 @@ const apiFetch = async ( endpoints, { authRequired = false, option ={} })=>{
         }
     }
     try{
-        const resp = await fetch(`${BASE_URL}${endpoints}`, {
+        let resp = await fetch(`${BASE_URL}${endpoints}`, {
             ...option,
             headers : {
                 ...(option.headers || {}),
                 ...(authRequired ? authHeaders() : {}),
-
             },
-        })
-        if([401,403].includes(resp.status)){
-            localStorage.removeItem("token");
-            return{
-                error : resp.status===401 ? "Unauthorized" : "Forbidden",
-                status : resp.status,
-            };
-        
-
+        });
+        // If 401 Unauthorized, try to refresh token and retry
+        if(resp.status === 401 && authRequired){
+            // Call refreshToken endpoint
+            const refreshResp = await refreshToken();
+            if(refreshResp && refreshResp.success && refreshResp.data && refreshResp.data.token){
+                localStorage.setItem("token", refreshResp.data.token);
+                // Retry original request with new token
+                resp = await fetch(`${BASE_URL}${endpoints}`, {
+                    ...option,
+                    headers : {
+                        ...(option.headers || {}),
+                        ...authHeaders(),
+                    },
+                });
+                if(resp.status === 401){
+                    localStorage.removeItem("token");
+                    return {
+                        success: false,
+                        message: "Unauthorized after refresh",
+                        data: null,
+                    };
+                }
+            }else{
+                localStorage.removeItem("token");
+                return {
+                    success: false,
+                    message: "Unauthorized, refresh failed",
+                    data: null,
+                };
+            }
         }
-       
-        if(resp.status=== 400){
+        if(resp.status === 403){
+            localStorage.removeItem("token");
+            return {
+                success: false,
+                message: "Forbidden",
+                data: null,
+            };
+        }
+        if(resp.status === 400){
             const json = await resp.json().catch(()=>null);
             console.log(json)
             return json;
         }
         return await resp.json();
-
     }catch(error){
         console.error("API Fetch Error:", error);
-        return { error : "Network error or server is unreachable."};
+        // Do NOT remove token on network/server error
+        return { success: false, message: "Network error or server is unreachable.", data: null };
     }
 };
 
 
 //===========================API function ===================================
+// Check if phone number exists
+export const checkPhoneNumber = (phoneNumber) => {
+    return apiFetch(`/api/user/check-phone?phone=${phoneNumber}`, {
+        authRequired: true,
+        option: {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        },
+    });
+};
 export const login = ({username,password}) =>{
     return apiFetch("/api/auth/login",{
         authRequired : false,

@@ -45,7 +45,7 @@ public class UserEntity {
     @NotBlank(message = "Phone is required")
     @Size(min = 11, max = 11, message = "Phone must be exactly 11 digits")
     @Pattern(regexp = "^034\\d{8}$", message = "Phone must start with 034 and be 11 digits total")
-    private String phonenumber;
+    private String phoneNumber;
 
     @Column(name = "refreshToken", length = 1000)
     private String refreshToken;
