@@ -4,7 +4,7 @@ import com.WebSockets.SpringBoot.DTOS.UserDto;
 import com.WebSockets.SpringBoot.Entity.UserEntity;
 import com.WebSockets.SpringBoot.Models.LoginRequestModel;
 import com.WebSockets.SpringBoot.Models.SignUpRequestModel;
-import com.WebSockets.SpringBoot.Repository.UserRepository;
+import com.WebSockets.SpringBoot.Repository.AuthRepository;
 import com.WebSockets.SpringBoot.customException.UserNotFoundException;
 import com.WebSockets.SpringBoot.customException.WrongPasswordException;
 import jakarta.validation.Valid;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
-    private final UserRepository userRepository;
+    private final AuthRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final TokenService tokenService;
 
-    public AuthService(UserRepository userRepository,
+    public AuthService(AuthRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
                        TokenService tokenService) {

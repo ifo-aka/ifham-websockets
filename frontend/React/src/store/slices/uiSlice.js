@@ -18,11 +18,11 @@ const uiSlice = createSlice({
         state.isMobileDimention=!!action.payload;
         state.isDesktopDimention=!action.payload;
      },
-     setIsDesktopDimenton(state,action){
+     setIsDesktopDimention(state,action){
         state.isDesktopDimention = !!action.payload;
         state.isMobileDimention = !action.payload;
      },
     }
 })
-export const {setIsDesktopDimenton,setIsMobileDimention} =uiSlice.actions;
+export const {setIsDesktopDimention,setIsMobileDimention} =uiSlice.actions;
 export default uiSlice.reducer;

@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Users")
@@ -16,8 +18,8 @@ import java.time.LocalDateTime;
 @Setter
 public class UserEntity {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
     @NotBlank(message = "Email is required")
@@ -41,10 +43,10 @@ public class UserEntity {
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "phonenumber", nullable = false, unique = true, length = 11)
     @NotBlank(message = "Phone is required")
     @Size(min = 11, max = 11, message = "Phone must be exactly 11 digits")
     @Pattern(regexp = "^034\\d{8}$", message = "Phone must start with 034 and be 11 digits total")
+    @Column(name = "phonenumber", nullable = false, unique = true, length = 11)
     private String phoneNumber;
 
     @Column(name = "refreshToken", length = 1000)
@@ -52,4 +54,8 @@ public class UserEntity {
 
     @Column(name = "exp")
     private LocalDateTime refreshTokenExpiry;
+
+    // 🔥 Relationship with Contacts
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContactEntity> contacts = new ArrayList<>();
 }

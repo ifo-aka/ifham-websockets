@@ -1,7 +1,7 @@
 package com.WebSockets.SpringBoot.Services;
 
 import com.WebSockets.SpringBoot.Entity.UserEntity;
-import com.WebSockets.SpringBoot.Repository.UserRepository;
+import com.WebSockets.SpringBoot.Repository.AuthRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
-  private final   UserRepository userRepository;
+  private final AuthRepository userRepository;
 
 
     @Override

@@ -2,8 +2,7 @@ package com.WebSockets.SpringBoot.Services;
 
 import com.WebSockets.SpringBoot.DTOS.UserDto;
 import com.WebSockets.SpringBoot.Entity.UserEntity;
-import com.WebSockets.SpringBoot.Models.APIResponse;
-import com.WebSockets.SpringBoot.Repository.UserRepository;
+import com.WebSockets.SpringBoot.Repository.AuthRepository;
 import com.WebSockets.SpringBoot.customException.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class TokenService {
-    private final UserRepository repository;
+    private final AuthRepository repository;
     private final JwtService jwtService;
 
 

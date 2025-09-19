@@ -106,12 +106,19 @@ const authSlice = createSlice({
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
-      .addCase(loginThunk.rejected, (state) => {
-        state.token = null;
-        state.isAuthenticated = false;
-        state.authChecked = false;
-        state.userObject = { id: null, username: null, email: null ,phoneNumber: null};
-        localStorage.removeItem("token");
+      .addCase(loginThunk.rejected, (state, action) => {
+        const error = action.payload;
+        if (error && typeof error === "object" && (error.message === "Unauthorized" || error.message === "Forbidden" || error.message === "Unauthorized after refresh" || error.message === "Unauthorized, refresh failed")) {
+          state.token = null;
+          state.isAuthenticated = false;
+          state.authChecked = false;
+          state.userObject = { id: null, username: null, email: null, phoneNumber: null };
+          localStorage.removeItem("token");
+        } else {
+          // Network/server error: don't delete token, just set auth to false
+          state.isAuthenticated = false;
+          state.authChecked = false;
+        }
         state.showSpinner = false;
       })
       .addCase(loginThunk.pending, (state) => {
@@ -128,12 +135,19 @@ const authSlice = createSlice({
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
-      .addCase(signupThunk.rejected, (state) => {
-        state.token = null;
-        state.isAuthenticated = false;
-        state.authChecked = false;
-        state.userObject = { id: null, username: null, email: null,phoneNumber: null };
-        localStorage.removeItem("token");
+      .addCase(signupThunk.rejected, (state, action) => {
+        const error = action.payload;
+        if (error && typeof error === "object" && (error.message === "Unauthorized" || error.message === "Forbidden" || error.message === "Unauthorized after refresh" || error.message === "Unauthorized, refresh failed")) {
+          state.token = null;
+          state.isAuthenticated = false;
+          state.authChecked = false;
+          state.userObject = { id: null, username: null, email: null, phoneNumber: null };
+          localStorage.removeItem("token");
+        } else {
+          // Network/server error: don't delete token, just set auth to false
+          state.isAuthenticated = false;
+          state.authChecked = false;
+        }
         state.showSpinner = false;
       })
       .addCase(signupThunk.pending, (state) => {
@@ -150,12 +164,19 @@ const authSlice = createSlice({
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
-      .addCase(refreshTokenThunk.rejected, (state) => {
-        state.token = null;
-        state.isAuthenticated = false;
-        state.authChecked = false;
-        state.userObject = { id: null, username: null, email: null, phoneNumber: null };
-        localStorage.removeItem("token");
+      .addCase(refreshTokenThunk.rejected, (state, action) => {
+        const error = action.payload;
+        if (error && typeof error === "object" && (error.message === "Unauthorized" || error.message === "Forbidden" || error.message === "Unauthorized after refresh" || error.message === "Unauthorized, refresh failed")) {
+          state.token = null;
+          state.isAuthenticated = false;
+          state.authChecked = false;
+          state.userObject = { id: null, username: null, email: null, phoneNumber: null };
+          localStorage.removeItem("token");
+        } else {
+          // Network/server error: don't delete token, just set auth to false
+          state.isAuthenticated = false;
+          state.authChecked = false;
+        }
         state.showSpinner = false;
       })
       .addCase(refreshTokenThunk.pending, (state) => {
