@@ -104,6 +104,10 @@ useEffect(() => {
      dispatch(getContactsThunk(userObject.id)).then((res)=>{
         if(res.payload.success){
           const file = new File([res.payload.data],"contacts.json",{type: "application/json"})
+          file.text().then((text)=>{
+            const contacts= JSON.parse(text)
+            console.log(contacts)
+          })
         }
      }).catch((err)=>{
        console.log(err)
