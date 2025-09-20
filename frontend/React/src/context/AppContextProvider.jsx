@@ -7,6 +7,7 @@ import notificationSound from "../utils/notification.wav";
 import { addMessage } from "../store/slices/chatSlice";
 import { increment } from "../store/slices/notificationSlice";
 
+
 import {refreshTokenThunk} from "../store/slices/authSlics"
 import {
 
@@ -14,6 +15,37 @@ import {
   setIsDesktopDimention,
 } from "../store/slices/uiSlice";
 import { getContactsThunk } from "../store/slices/contactsSlice";
+import { openDB } from 'idb';
+
+// IndexedDB utility functions for contacts
+const dbPromise = openDB('ContactsDB', 1, {
+  upgrade(db) {
+    if (!db.objectStoreNames.contains('contacts')) {
+      db.createObjectStore('contacts', { keyPath: 'id' }); // Use database id as key
+    }
+  },
+});
+
+export async function addContactToDB(contact) {
+  const db = await dbPromise;
+  await db.put('contacts', contact); // Adds or updates contact by id
+}
+
+export async function getAllContactsFromDB() {
+  const db = await dbPromise;
+  return await db.getAll('contacts');
+}
+
+export async function updateContactInDB(contact) {
+  const db = await dbPromise;
+  await db.put('contacts', contact); // Updates contact by id
+}
+
+export async function deleteContactFromDB(contactId) {
+  const db = await dbPromise;
+  await db.delete('contacts', contactId); // Deletes contact by id
+}
+
 
 const AppContextProvider = ({ children }) => {
   const dispatch = useDispatch();
@@ -21,6 +53,16 @@ const AppContextProvider = ({ children }) => {
   const stompClientRef = useRef(null);
   const audioRef = useRef(new Audio(notificationSound));
    const prevWidth = useRef(window.innerWidth)
+
+   useEffect(()=>{
+    const asyncfun= async()=>{
+    const  contacts =await getAllContactsFromDB();
+    console.log(contacts)
+
+    }
+asyncfun();
+
+   },[])
 
   useEffect(() => {
     // 🟢 WebSocket + STOMP setup
@@ -102,12 +144,26 @@ useEffect(() => {
   useEffect(() => {
     if(userObject.id){
      dispatch(getContactsThunk(userObject.id)).then((res)=>{
+      console.log(res)
         if(res.payload.success){
-          const file = new File([res.payload.data],"contacts.json",{type: "application/json"})
-          file.text().then((text)=>{
-            const contacts= JSON.parse(text)
-            console.log(contacts)
-          })
+        // Save contacts to IndexedDB for offline access using database id as key
+        (async () => {
+          try {
+            const db = await dbPromise;
+            // Clear previous contacts
+            const txClear = db.transaction('contacts', 'readwrite');
+            await txClear.objectStore('contacts').clear();
+            await txClear.done;
+            // Add new contacts
+            for (const contact of res.payload.data) {
+              await db.put('contacts', contact); // Uses id from backend
+            }
+            console.log('Contacts saved to IndexedDB');
+          } catch (e) {
+            console.error('Failed to save contacts to IndexedDB', e);
+          }
+        })();
+        
         }
      }).catch((err)=>{
        console.log(err)
@@ -115,6 +171,7 @@ useEffect(() => {
     }
 
   },[userObject.id,dispatch])
+
 
   return (
     <AppContext.Provider value={{ stompClient: stompClientRef }}>

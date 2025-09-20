@@ -4,6 +4,7 @@ import com.WebSockets.SpringBoot.Entity.ContactEntity;
 import com.WebSockets.SpringBoot.Models.APIResponse;
 import com.WebSockets.SpringBoot.Models.AddContactModel;
 import com.WebSockets.SpringBoot.Repository.AuthRepository;
+import com.WebSockets.SpringBoot.Repository.ContactRepository;
 import com.WebSockets.SpringBoot.Services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import java.util.List;
 public class UserController {
     private final AuthRepository repository;
     private final UserService userService;
+    private  final ContactRepository contactRepository;
 
 
 
@@ -38,6 +40,10 @@ public class UserController {
     public APIResponse<ContactEntity> addContact(
             @PathVariable Long userId,
             @RequestBody AddContactModel contact) {
+
+        if(userService.existCheck(userId,contact)){
+            return new APIResponse<>(true,"Phone number already saved",null);
+        }
 
         ContactEntity saved = userService.addContact(userId, contact);
         return new APIResponse<>(true, "Contact saved successfully", saved);

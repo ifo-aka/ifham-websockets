@@ -157,6 +157,17 @@ const ChatPage = () => {
     console.log(userObject.id)
     dispatch(addContactThunk( {saveAs, phoneNumber ,id: userObject.id})).then((res)=>{
       console.log(res)
+      if(res.payload.success){
+        if(res.payload.message == "Phone number already saved"){
+          setPhoneError("Phone number already saved");
+          return;
+        }
+        setShowAddModal(false);
+        setSaveAs("");
+        setPhoneNumber("");
+        setPhoneError("");
+        setPhoneCheckResult("");
+      }
     })
   };
 

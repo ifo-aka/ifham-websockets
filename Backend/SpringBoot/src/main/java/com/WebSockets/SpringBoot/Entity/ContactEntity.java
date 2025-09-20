@@ -9,7 +9,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Contacts")
+@Table(name = "Contacts",
+uniqueConstraints = {
+@UniqueConstraint(columnNames = {"user_id", "phone_number"})
+    }
+)
 @Getter
 @Setter
 public class ContactEntity {

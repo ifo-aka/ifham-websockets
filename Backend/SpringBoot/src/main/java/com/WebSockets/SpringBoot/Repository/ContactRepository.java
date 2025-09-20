@@ -1,6 +1,7 @@
 package com.WebSockets.SpringBoot.Repository;
 
 import com.WebSockets.SpringBoot.Entity.ContactEntity;
+import com.WebSockets.SpringBoot.Entity.UserEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,5 +11,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ContactRepository extends JpaRepository<ContactEntity,Long> {
-
+  boolean  existsByUserAndPhoneNumber(UserEntity entity,String phoneNumber);
 }

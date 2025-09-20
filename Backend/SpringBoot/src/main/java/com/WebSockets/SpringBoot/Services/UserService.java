@@ -7,6 +7,7 @@ import com.WebSockets.SpringBoot.Repository.AuthRepository;
 import com.WebSockets.SpringBoot.Repository.ContactRepository;
 import com.WebSockets.SpringBoot.customException.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,6 +31,11 @@ public class UserService {
         contactEntity.setPhoneNumber(contact.getPhoneNumber());
         return contactRepository.save(contactEntity);
     }
+    public  boolean existCheck(Long id,AddContactModel model){
+        UserEntity entity = userRepository.findById(id).orElseThrow(()-> new UsernameNotFoundException("no user found for id"));
+
+        return contactRepository.existsByUserAndPhoneNumber(entity,model.getPhoneNumber());
+    }
 
     // Get all contacts for a user
     public List<ContactEntity> getContacts(Long userId) {
@@ -43,4 +49,5 @@ public class UserService {
     public void removeContact(Long contactId) {
         contactRepository.deleteById(contactId);
     }
+
 }

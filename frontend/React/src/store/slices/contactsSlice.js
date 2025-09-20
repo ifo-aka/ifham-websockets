@@ -61,6 +61,9 @@ const contactSlice= createSlice({
     extraReducers:(builder)=>{
         builder
         .addCase(addContactThunk.fulfilled,(state,action)=>{
+            if(action.payload.message == "Phone number already saved"){
+                return;
+            }
             state.contacts.push(action.payload.data)
         })
         .addCase(addContactThunk.rejected,(state,action)=>{
