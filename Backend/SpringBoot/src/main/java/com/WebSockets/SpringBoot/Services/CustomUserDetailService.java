@@ -2,6 +2,7 @@ package com.WebSockets.SpringBoot.Services;
 
 import com.WebSockets.SpringBoot.Entity.UserEntity;
 import com.WebSockets.SpringBoot.Repository.AuthRepository;
+import com.WebSockets.SpringBoot.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,12 +18,9 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException("No User exist with this email"));
+        UserEntity user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("No User exist with this email"));
 
-        return User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .roles("user")
-                .build();
+        return new CustomUserDetails(user);
     }
+
 }

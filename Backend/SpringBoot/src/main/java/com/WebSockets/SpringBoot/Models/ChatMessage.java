@@ -1,3 +1,4 @@
+// model to get message at controller
 package com.WebSockets.SpringBoot.Models;
 
 import lombok.AllArgsConstructor;
@@ -11,5 +12,5 @@ public class ChatMessage {
     private String from;
     private String content;
     private String to;
-    private  String time;
+
 }

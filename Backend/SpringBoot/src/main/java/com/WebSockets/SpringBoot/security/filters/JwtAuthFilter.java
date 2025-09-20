@@ -1,6 +1,8 @@
 package com.WebSockets.SpringBoot.security.filters;
 
+import com.WebSockets.SpringBoot.Services.CustomUserDetailService;
 import com.WebSockets.SpringBoot.Services.JwtService;
+import com.WebSockets.SpringBoot.security.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +47,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
         if(jwtService.isTokenValid(jwt,username)){
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+            CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
+            String phoneNumber = customUserDetails.getPhoneNumber();
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(phoneNumber,null,customUserDetails.getAuthorities());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }

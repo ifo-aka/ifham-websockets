@@ -70,22 +70,37 @@ asyncfun();
     const client = over(socket);
     stompClientRef.current = client;
 
-    client.connect({}, () => {
+    client.connect({
+
+   Authorization: `Bearer ${localStorage.getItem("token")}` 
+
+
+    }, () => {
       console.log("✅ Connected to WebSocket");
 
       client.subscribe("/topic/messages", (msg) => {
         const received = JSON.parse(msg.body);
+        handleIncoming(received);
 
-        // Save message in Redux
-        dispatch(addMessage(received));
+     
+        });
+           client.subscribe("/user/queue/message", (privateMsg) => {
+          const privateReceived = JSON.parse(privateMsg.body);
+          const msgObj={
+            id: privateReceived.id,
+            from: privateReceived.senderPhone,
+            to : privateReceived.receiverPhone,
+            content : privateReceived.content,
+            timestamp : privateReceived.timeStamp
 
-        // Play notification if window is not focused
-        if (!document.hasFocus() && received.from !== "Bot") {
-          audioRef.current.play().catch(() => {});
-          dispatch(increment());
-        }
+          }
+          // Save private message in Redux
+          handleIncoming(msgObj);
+
+
       });
     });
+
 
     return () => {
       if (stompClientRef.current) {
@@ -93,7 +108,15 @@ asyncfun();
       }
     };
   }, [dispatch]);
+  const handleIncoming = (received) => {
+    dispatch(addMessage(received));
+    console.log(received)
 
+    if (!document.hasFocus() && received.fromPhone !== userObject.phoneNumber) {
+      audioRef.current.play().catch(() => {});
+      dispatch(increment());
+    }
+  };
 
 useEffect(() => {
   // Run immediately at mount

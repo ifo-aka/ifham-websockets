@@ -1,3 +1,6 @@
+//Chat entity to save in database
+
+
 package com.WebSockets.SpringBoot.Entity;
 
 import jakarta.persistence.*;
@@ -13,7 +16,7 @@ import java.time.Instant;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessage {
+public class ChatMessageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +31,7 @@ public class ChatMessage {
     @Column(name = "content", columnDefinition = "TEXT" ,nullable = false)
     @NotBlank
     private String content;
+
     @Column(name = "timestamp")
 
     private Instant timestamp = Instant.now();
