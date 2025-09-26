@@ -5,6 +5,8 @@ import authReducer from "./slices/authSlics";
 import notificationReducer from "./slices/notificationSlice";
 import chatReducer from "./slices/chatSlice"; 
 import contactReducer from "./slices/contactsSlice";
+import presenceReducer from "./slices/presenceSlice";
+
 export const store = configureStore({
   reducer: {
     // auth: authReducer,
@@ -13,6 +15,7 @@ export const store = configureStore({
         notification: notificationReducer,
         chat: chatReducer,
         contact :contactReducer,
+        presence: presenceReducer,
 
   },
 });

@@ -36,6 +36,7 @@ public class ChatMessageEntity {
 
     private Instant timestamp = Instant.now();
 
+
     // SENT / DELIVERED / READ
     @Column(name = "status")
     private String status = "SENT";

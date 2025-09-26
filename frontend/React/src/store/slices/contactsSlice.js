@@ -26,7 +26,7 @@ export const getContactsThunk=createAsyncThunk(
     async(userId,{rejectWithValue})=>{
         try {
             const response= await getContacts(userId);
-            console.log(response);
+            // console.log(response);
             if(!response.success){
                 rejectWithValue(response)
             }

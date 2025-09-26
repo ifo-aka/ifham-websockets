@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity,Long> {
     List<ChatMessageEntity> findByReceiverPhoneAndStatus(String receiverPhone, String status);
+    List<ChatMessageEntity> findBySenderPhone(String senderPhone);
+    List<ChatMessageEntity> findBySenderPhoneOrReceiverPhoneOrderByTimestampAsc(String senderPhone, String receiverPhone);
 }

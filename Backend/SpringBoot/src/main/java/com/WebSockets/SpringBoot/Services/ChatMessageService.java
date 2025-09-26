@@ -6,7 +6,9 @@ import com.WebSockets.SpringBoot.Repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,16 @@ public class ChatMessageService {
     }
     public void saveAll(List<ChatMessageEntity> msgs) {
         repository.saveAll(msgs);
+    }
+    public List<ChatMessageEntity> getAllConversations(String userPhone) {
+        return repository.findBySenderPhoneOrReceiverPhoneOrderByTimestampAsc(userPhone, userPhone);
+
+    }
+    public void updateStatus(Long messageId, String status) {
+        repository.findById(messageId).ifPresent(msg -> {
+            msg.setStatus(status);
+            repository.save(msg);
+        });
     }
 
 }

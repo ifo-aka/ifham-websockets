@@ -18,22 +18,41 @@ public class ChatController {
 
     @MessageMapping("/sendMessage")
     @SendTo("/topic/messages")
-    public ChatMessage broadcastMessage(ChatMessage message){
-        return message;
-    }
-    @MessageMapping("/private-message")
-    public  void  sendPrivateMessage(ChatMessage message){
-        System.out.println(message);
-  ChatMessageEntity entity= service.save(message);
+    public MessageDTO broadcastMessage(ChatMessage message){
+        ChatMessageEntity entity = service.save(message);
         MessageDTO dto = new MessageDTO();
         dto.setId(entity.getId());
-        dto.setSenderPhone(entity.getSenderPhone());
         dto.setReceiverPhone(entity.getReceiverPhone());
+        dto.setSenderPhone(entity.getSenderPhone());
         dto.setContent(entity.getContent());
         dto.setTimeStamp(entity.getTimestamp());
-        System.out.println("reached");
-   messagingTemplate.convertAndSendToUser(message.getTo(),"/queue/message",dto);
-   messagingTemplate.convertAndSendToUser(message.getFrom(),"/queue/message",dto);
-
+        return dto;
     }
+
+    @MessageMapping("/private-message")
+    public void sendPrivateMessage(ChatMessage message){
+        ChatMessageEntity entity = service.save(message);
+        MessageDTO dto = new MessageDTO();
+
+        dto.setId(entity.getId());
+        dto.setReceiverPhone(entity.getReceiverPhone());
+        dto.setSenderPhone(entity.getSenderPhone());
+        dto.setContent(entity.getContent());
+        dto.setTimeStamp(entity.getTimestamp());
+
+        messagingTemplate.convertAndSendToUser(message.getTo(), "/queue/message", dto);
+        messagingTemplate.convertAndSendToUser(message.getFrom(), "/queue/message", dto);
+    }
+    @MessageMapping("/updateStatus")
+    public void updateMessageStatus(MessageDTO statusUpdate) {
+        // Update DB
+        service.updateStatus(statusUpdate.getId(), statusUpdate.getStatus());
+
+        // Notify both sender & receiver about the new status
+        messagingTemplate.convertAndSendToUser(
+                statusUpdate.getSenderPhone(), "/queue/status", statusUpdate);
+        messagingTemplate.convertAndSendToUser(
+                statusUpdate.getReceiverPhone(), "/queue/status", statusUpdate);
+    }
+
 }

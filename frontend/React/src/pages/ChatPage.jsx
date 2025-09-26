@@ -1,498 +1,253 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useRef,
-  createRef,
-  Fragment,
-} from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { reset } from "../store/slices/notificationSlice";
-import { AppContext } from "../context/AppContext";
-import Container from "../components/Container";
-import Input from "../components/Input";
-import { checkPhoneNumber } from "../utils/DBUtils";
-import { CSSTransition, TransitionGroup } from "react-transition-group";
-import imgPlaceholder from "../assets/imges/user-placeholder.png";
+/* ===================== ChatPage.jsx ===================== */
+import React, { useState, useEffect, useRef, useContext, useMemo } from "react";
+import { useSelector } from "react-redux";
 import styles from "../assets/ChatPage.module.css";
-import { addContactThunk } from "../store/slices/contactsSlice";
+import imgPlaceholder from "../assets/imges/user-placeholder.png";
+import { AppContext } from "../context/AppContextProvider";
 
-/* helper: format time */
-const formatTime = (isoOrDate) => {
+// ---------- Helpers ----------
+const formatTime = (iso) => {
   try {
-    const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
+    const d = new Date(iso);
     return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   } catch {
     return "";
   }
 };
 
-const ChatPage = () => {
-  const dispatch = useDispatch();
-  const { stompClient } = useContext(AppContext);
+const getRelativeDate = (isoDate) => {
+  if (!isoDate) return null;
+  const date = new Date(isoDate);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
 
-  const { messages: allMessages = [] } = useSelector((s) => s.chat);
-  const { contacts = [] } = useSelector((s) => s.contact);
-  const { userObject = {} } = useSelector((s) => s.auth);
-console.log(contacts)
-  const myName = userObject?.username || "You";
-  const myPhone = userObject?.phoneNumber || "";
+  // Clear time part for accurate date comparison
+  today.setHours(0, 0, 0, 0);
+  yesterday.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
 
-  console.log("messages", allMessages);
+  if (date.getTime() === today.getTime()) {
+    return "Today";
+  }
+  if (date.getTime() === yesterday.getTime()) {
+    return "Yesterday";
+  }
+  return date.toLocaleDateString();
+};
 
-  // UI state
-  const [activeSidebar, setActiveSidebar] = useState("General");
-  const [activeContact, setActiveContact] = useState(null);
-  const [newMessage, setNewMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [saveAs, setSaveAs] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [phoneCheckResult, setPhoneCheckResult] = useState("");
-  const [isChecking, setIsChecking] = useState(false);
+const formatLastSeen = (isoString) => {
+  if (!isoString) return "Offline";
+  const lastSeenDate = new Date(isoString);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
 
-  // scroll
-  const messagesEndRef = useRef(null);
-  const refsMap = useRef(new Map());
+  const time = lastSeenDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // visible messages logic
-  const visibleMessages = allMessages.filter((m) => {
-    if (!activeContact || activeContact === "General") {
-      return m.to === "General"; ;
+  // Reset hours, minutes, seconds and milliseconds
+  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+  const lastSeenStart = new Date(lastSeenDate.getFullYear(), lastSeenDate.getMonth(), lastSeenDate.getDate());
+
+  if (lastSeenStart.getTime() === todayStart.getTime()) {
+    return `last seen today at ${time}`;
+  }
+  if (lastSeenStart.getTime() === yesterdayStart.getTime()) {
+    return `last seen yesterday at ${time}`;
+  }
+  return `last seen on ${lastSeenDate.toLocaleDateString()}`;
+};
+
+
+// ---------- Sidebar ----------
+function Sidebar({ onSelectChat }) {
+  const { contacts = [] } = useSelector((state) => state.contact || {});
+  const { messagesByContact } = useSelector((state) => state.chat);
+
+  const getLastMessage = (contactId) => {
+    const messages = messagesByContact[contactId];
+    if (!messages || messages.length === 0) {
+      return { text: "No messages yet", time: "" };
     }
-    return (
-      (m.to && (m.to === activeContact.phoneNumber && m.from === myPhone)) ||
-      (m.from && (m.from === activeContact.phoneNumber && m.to === myPhone))
-    );
-  });
-
-  // auto-scroll when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [visibleMessages.length]);
-
-  // reset notifications on focus
-  useEffect(() => {
-    const onFocus = () => dispatch(reset());
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [dispatch]);
-
-  // phone validation + existence check
-  useEffect(() => {
-    setPhoneError("");
-    setPhoneCheckResult("");
-
-    if (!phoneNumber) return;
-
-    if (!/^\d*$/.test(phoneNumber)) {
-      setPhoneError("Only digits allowed");
-      return;
-    }
-    if (phoneNumber.length > 11) {
-      setPhoneError("Too long (max 11)");
-      return;
-    }
-    if (phoneNumber.length >= 3 && !phoneNumber.startsWith("034")) {
-      setPhoneError("Must start with 034");
-      return;
-    }
-
-    if (phoneNumber.length === 11) {
-      setIsChecking(true);
-      checkPhoneNumber(phoneNumber)
-        .then((res) => setPhoneCheckResult(res?.message || "No response"))
-        .catch(() => setPhoneCheckResult("Error checking number"))
-        .finally(() => setIsChecking(false));
-    }
-  }, [phoneNumber]);
-
-  // send message (STOMP)
-  const handleSend = (e) => {
-    e?.preventDefault();
-    if (!newMessage.trim()) return;
-    if (!stompClient?.current) {
-      console.warn("No stomp client connected");
-      return;
-    }
-
-    const payload = {
-      from: myPhone,
-      content: newMessage.trim(),
-      to:
-        activeContact && activeContact !== "General"
-          ? activeContact.phoneNumber
-          : "General",
+    const lastMsg = messages[messages.length - 1];
+    return {
+      text: lastMsg.content,
+      time: formatTime(lastMsg.timestamp),
     };
-
-    try {
-      if (payload.to === "General") {
-        stompClient.current.send(
-          "/app/sendMessage",
-          {},
-          JSON.stringify(payload)
-        );
-      } else {
-        stompClient.current.send(
-          "/app/private-message",
-          {},
-          JSON.stringify(payload)
-        );
-      }
-      setNewMessage("");
-    } catch (err) {
-      console.error("Failed to send message", err);
-    }
-  };
-
-  const startChatWith = (contact) => {
-    setActiveSidebar("Chats");
-    setActiveContact(contact);
-  };
-
-  const filteredContacts = contacts
-    .filter((c) => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        (c.savedAs || c.username || "").toLowerCase().includes(q) ||
-        (c.phoneNumber || "").toLowerCase().includes(q)
-      );
-    })
-    .sort((a, b) =>
-      (a.savedAs || a.username || "").localeCompare(b.savedAs || b.username || "")
-    );
-
-  const handleSaveContact = (e) => {
-    e.preventDefault();
-    dispatch(
-      addContactThunk({ saveAs, phoneNumber, id: userObject.id })
-    ).then((res) => {
-      if (res.payload.success) {
-        if (res.payload.message === "Phone number already saved") {
-          setPhoneError("Phone number already saved");
-          return;
-        }
-        setShowAddModal(false);
-        setSaveAs("");
-        setPhoneNumber("");
-        setPhoneError("");
-        setPhoneCheckResult("");
-      }
-    });
   };
 
   return (
-    <Container className={styles.containerRoot}>
-      <div className={styles.chatContainer}>
-        {/* Left Sidebar */}
-        <aside className={styles.leftSidebar}>
-          <div className={styles.leftHeader}>
-            <div className={styles.leftTitle}>Chats</div>
-            <button
-              className={styles.iconBtn}
-              onClick={() => setShowAddModal(true)}
-              title="New contact"
-            >
-              ➕
-            </button>
-          </div>
-
-          <div className={styles.sidebarMenu}>
-            {["General", "All", "Friends", "Work", "Support", "Settings"].map(
-              (item) => (
-                <div
-                  key={item}
-                  className={`${styles.menuItem} ${
-                    activeSidebar === item ? styles.activeMenuItem : ""
-                  }`}
-                  onClick={() => {
-                    setActiveSidebar(item);
-                    setActiveContact(item === "General" ? "General" : null);
-                  }}
-                >
-                  {item}
-                </div>
-              )
-            )}
-          </div>
-
-          <div className={styles.recentChats}>
-            <div className={styles.recentTitle}>Recent</div>
-            {contacts.slice(0, 6).map((c, idx) => (
-              <div
-                key={(c.phoneNumber || "") + idx}
-                className={`${styles.recentItem} ${
-                  activeContact?.phoneNumber === c.phoneNumber
-                    ? styles.recentActive
-                    : ""
-                }`}
-                onClick={() => startChatWith(c)}
-              >
-                <img
-                  src={imgPlaceholder}
-                  alt={c.savedAs}
-                  className={styles.recentAvatar}
-                />
-                <div className={styles.recentMeta}>
-                  <div className={styles.recentName}>
-                    {c.savedAs || c.username || "Unknown"}
-                  </div>
-                  <div className={styles.recentSnippet}>
-                    {c.lastMessage?.slice(0, 28) || "Say hi!"}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </aside>
-
-        {/* Middle Chat Area */}
-        <main className={styles.chatArea}>
-          <header className={styles.chatHeader}>
-            <div className={styles.chatHeaderLeft}>
-              {activeContact && activeContact !== "General" ? (
-                <Fragment>
-                  <img
-                    src={imgPlaceholder}
-                    alt="avatar"
-                    className={styles.headerAvatar}
-                  />
-                  <div>
-                    <div className={styles.headerTitle}>
-                      {activeContact.savedAs || activeContact.username}
-                    </div>
-                    <div className={styles.headerSub}>
-                      {activeContact.phoneNumber}
-                    </div>
-                  </div>
-                </Fragment>
-              ) : (
-                <div>
-                  <div className={styles.headerTitle}>General Chat</div>
-                  <div className={styles.headerSub}>
-                    Public room · Be kind ✨
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.chatHeaderRight}>
-              <div className={styles.headerSmall}>{myName}</div>
-              <div className={styles.headerSmallMuted}>{myPhone}</div>
-            </div>
-          </header>
-
-          {/* Messages area */}
-          <div className={styles.messagesWrap}>
-            {(!activeContact || activeContact === "General") &&
-            visibleMessages.length === 0 ? (
-              <div className={styles.welcomeCard}>
-                <h2>Welcome to WhatsApp Clone</h2>
-                <p>
-                  Select a contact to start messaging. Use the + button to add
-                  contacts.
-                </p>
-              </div>
-            ) : (
-              <TransitionGroup className={styles.messagesList}>
-                {visibleMessages.map((m, i) => {
-                  const msgKey = String(m.id ?? `${m.timestamp}-${i}`);
-                  if (!refsMap.current.has(msgKey)) {
-                    refsMap.current.set(msgKey, createRef());
-                  }
-                  const nodeRef = refsMap.current.get(msgKey);
-
-                  const mine = m.from === myPhone;
-
-                  return (
-                    <CSSTransition
-                      key={msgKey}
-                      nodeRef={nodeRef}
-                      timeout={240}
-                      classNames="msg"
-                      unmountOnExit
-                    >
-                      <div
-                        ref={nodeRef}
-                        className={`${styles.message} ${
-                          mine ? styles.myMessage : styles.theirMessage
-                        }`}
-                        aria-live="polite"
-                      >
-                        {/* (2) [{…}, {…}]
-0
-: 
-{id: 2, savedAs: 'Saad', phoneNumber: '03459469170'}
-1
-: 
-{id: 3, savedAs: 'Mudasir', phoneNumber: '03469048703'}
-length
-: 
-2
-[[Prototype]]
-: 
-Array(0) */}
-                        <div className={styles.messageTop}>
-                          <span className={styles.msgFrom}>
-                            {mine ? "You" :
-                              contacts.find(c => c.phoneNumber === m.from)
-                              ? contacts.find(c => c.phoneNumber === m.from).savedAs
-                              : m.from
-                             
-                               }
-                          </span>
-                          <span className={styles.msgTime}>
-                            {formatTime(m.timestamp)}
-                          </span>
-                        </div>
-                        <div className={styles.msgContent}>{m.content}</div>
-                      </div>
-                    </CSSTransition>
-                  );
-                })}
-                <div ref={messagesEndRef} />
-              </TransitionGroup>
-            )}
-          </div>
-
-          {/* Input */}
-          <form className={styles.inputArea} onSubmit={handleSend}>
-            <input
-              type="text"
-              placeholder={
-                activeContact && activeContact !== "General"
-                  ? `Message ${activeContact.savedAs || activeContact.username}`
-                  : "Message the group"
-              }
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              className={styles.messageInput}
-            />
-            <button
-              type="submit"
-              className={styles.sendBtn}
-              disabled={!stompClient?.current}
-            >
-              ➤
-            </button>
-          </form>
-        </main>
-
-        {/* Right Sidebar: Contacts */}
-        <aside className={styles.rightSidebar}>
-          <div className={styles.contactsHeader}>
-            <div className={styles.contactsTitle}>Contacts</div>
-            <button
-              className={styles.iconBtn}
-              onClick={() => setShowAddModal(true)}
-            >
-              ＋
-            </button>
-          </div>
-
-          <div className={styles.contactsSearch}>
-            <Input
-              placeholder="Search contacts"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              name="contactSearch"
-            />
-          </div>
-
-          <div className={styles.contactsList}>
-            {filteredContacts.length === 0 && (
-              <div className={styles.emptyContacts}>No contacts found</div>
-            )}
-            {filteredContacts.map((c, index) => (
-              <div
-                key={(c.phoneNumber || "") + index}
-                className={`${styles.contactCard} ${
-                  activeContact?.phoneNumber === c.phoneNumber
-                    ? styles.contactActive
-                    : ""
-                }`}
-                onClick={() => startChatWith(c)}
-              >
-                <img
-                  src={imgPlaceholder}
-                  alt={c.savedAs}
-                  className={styles.contactAvatar}
-                />
-                <div className={styles.contactMeta}>
-                  <div className={styles.contactName}>
-                    {c.savedAs || c.username}
-                  </div>
-                  <div className={styles.contactPhone}>{c.phoneNumber}</div>
-                </div>
-                <div className={styles.contactRight}>
-                  <div className={styles.lastMsg}>
-                    {c.lastMessage?.slice(0, 28)}
-                  </div>
-                  {c.unread > 0 && (
-                    <div className={styles.unreadBadge}>{c.unread}</div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </aside>
+    <div className={styles.sidebar}>
+      <div className={styles.sidebarHeader}>
+        <img src={imgPlaceholder} alt="me" className={styles.avatarSmall} />
+        <div className={styles.sidebarActions}>⚙️</div>
       </div>
-
-      {/* Add Contact Modal */}
-      {showAddModal && (
-        <div className={styles.modalOverlay}>
-          <form className={styles.modal} onSubmit={handleSaveContact}>
-            <h3>Add Contact</h3>
-            <div className={styles.modalBody}>
-              <input
-                type="text"
-                placeholder="Save as (name)"
-                value={saveAs}
-                onChange={(e) => setSaveAs(e.target.value)}
-                className={styles.modalInput}
-              />
-              <input
-                type="text"
-                placeholder="Phone (034xxxxxxxx)"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className={styles.modalInput}
-                maxLength={11}
-                inputMode="numeric"
-              />
-              {phoneError && (
-                <div className={styles.modalError}>{phoneError}</div>
-              )}
-              {!phoneError && phoneCheckResult && (
-                <div className={styles.modalInfo}>
-                  {isChecking ? "Checking..." : phoneCheckResult}
-                </div>
-              )}
+      <div className={styles.searchBar}>
+        <input type="text" placeholder="Search or start new chat" />
+      </div>
+      <div className={styles.chatList}>
+        {contacts.map((c) => (
+          <div key={c.id} className={styles.chatListItem} onClick={() => onSelectChat(c)}>
+            <img src={imgPlaceholder} alt="dp" className={styles.avatarSmall} />
+            <div className={styles.chatListText}>
+              <div className={styles.chatListName}>{c.savedAs}</div>
+              <div className={styles.chatListLast}>{getLastMessage(c.phoneNumber).text}</div>
             </div>
-
-            <div className={styles.modalActions}>
-              <button
-                className={styles.addButton}
-                type="submit"
-                disabled={phoneCheckResult !== "User Available"}
-              >
-                Add
-              </button>
-              <button
-                type="button"
-                className={styles.closeButton}
-                onClick={() => setShowAddModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </Container>
+            <div className={styles.chatListTime}>{getLastMessage(c.phoneNumber).time}</div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
-};
+}
 
-export default ChatPage;
+// ---------- Chat Panel ----------
+function ChatHeader({ title = "Contact", subtitle = "online" }) {
+  return (
+    <div className={styles.chatHeader}>
+      <div className={styles.headerLeft}>
+        <img src={imgPlaceholder} alt="dp" className={styles.avatarSmall} />
+        <div>
+          <div className={styles.headerTitle}>{title}</div>
+          <div className={styles.headerSub}>{subtitle}</div>
+        </div>
+      </div>
+      <div className={styles.headerRight}>📞 ⋮</div>
+    </div>
+  );
+}
+
+function MessageBubble({ m, isMine }) {
+  return (
+    <div className={`${styles.messageRow} ${isMine ? styles.rowMine : ""}`}>
+      <div className={`${styles.bubble} ${isMine ? styles.bubbleMine : styles.bubbleTheir}`}>
+        <div>{m.content}</div>
+        <div className={styles.bubbleMeta}>
+          <span className={styles.time}>{formatTime(m.timestamp)}</span>
+          {isMine && <span className={styles.ticks}>{m.status === "SEEN" ? "✅✅" : "✅"}</span>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChatBody({ messages, myPhoneNumber }) {
+  const endRef = useRef(null);
+
+  const groupedMessages = useMemo(() => {
+    if (!messages) return {};
+    return messages.reduce((acc, m) => {
+      const dateStr = getRelativeDate(m.timestamp);
+      if (!acc[dateStr]) {
+        acc[dateStr] = [];
+      }
+      acc[dateStr].push(m);
+      return acc;
+    }, {});
+  }, [messages]);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  return (
+    <div className={styles.chatBody}>
+      {Object.keys(groupedMessages).map(date => (
+        <React.Fragment key={date}>
+          <div className={styles.dateDivider}>
+            <span className={styles.dateDividerSpan}>{date}</span>
+          </div>
+          {groupedMessages[date].map(m => (
+            <MessageBubble key={m.id} m={m} isMine={m.senderPhone === myPhoneNumber} />
+          ))}
+        </React.Fragment>
+      ))}
+      <div ref={endRef} />
+    </div>
+  );
+}
+
+function ChatInput({ onSend }) {
+  const [text, setText] = useState("");
+  const submit = (e) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    onSend(text);
+    setText("");
+  };
+  return (
+    <form className={styles.chatInput} onSubmit={submit}>
+      <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message" />
+      <button type="submit">➤</button>
+    </form>
+  );
+}
+
+// ---------- Main Page ----------
+export default function ChatPage() {
+  const [activeChat, setActiveChat] = useState(null);
+  const { stompClient } = useContext(AppContext);
+
+  const { userObject } = useSelector((state) => state.auth);
+  const { messagesByContact } = useSelector((state) => state.chat);
+  const { userStatus } = useSelector((state) => state.presence);
+
+  const messages = activeChat ? messagesByContact[activeChat.phoneNumber] || [] : [];
+
+  useEffect(() => {
+    if (!messages || !stompClient.current || !activeChat) return;
+
+    messages.forEach(message => {
+      if (message.senderPhone === activeChat.phoneNumber && message.status !== 'SEEN') {
+        const statusUpdate = {
+          id: message.id,
+          senderPhone: message.senderPhone,
+          receiverPhone: message.receiverPhone,
+          status: 'SEEN'
+        };
+        stompClient.current.send("/app/updateStatus", {}, JSON.stringify(statusUpdate));
+      }
+    });
+
+  }, [messages, activeChat, stompClient]);
+
+  const handleSend = (text) => {
+    if (!stompClient.current || !activeChat) return;
+
+    const message = {
+      from: userObject.phoneNumber,
+      to: activeChat.phoneNumber,
+      content: text,
+    };
+
+    stompClient.current.send("/app/private-message", {}, JSON.stringify(message));
+  };
+
+  let subtitle = "Offline";
+  if (activeChat) {
+    const contactPresence = userStatus[activeChat.phoneNumber];
+    if (contactPresence?.status === "ONLINE") {
+      subtitle = "Online";
+    } else if (contactPresence?.lastSeen) {
+      subtitle = formatLastSeen(contactPresence.lastSeen);
+    }
+  }
+
+  return (
+    <div className={styles.app}>
+      <Sidebar onSelectChat={setActiveChat} />
+      <div className={styles.chatPanel}>
+        {activeChat ? (
+          <>
+            <ChatHeader title={activeChat.savedAs} subtitle={subtitle} />
+            <ChatBody messages={messages} myPhoneNumber={userObject.phoneNumber} />
+            <ChatInput onSend={handleSend} />
+          </>
+        ) : (
+          <div className={styles.emptyState}>Select a chat to start messaging</div>
+        )}
+      </div>
+    </div>
+  );
+}
