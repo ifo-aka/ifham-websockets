@@ -25,6 +25,7 @@ import {
 } from "../store/slices/uiSlice";
 import { getContactsThunk } from "../store/slices/contactsSlice";
 import { updateUserStatus } from "../store/slices/presenceSlice";
+import { startTyping, stopTyping } from "../store/slices/typingSlice";
 
 import { openDB } from "idb";
 import { normalizeIncoming } from "../utils/messageUtils";
@@ -68,6 +69,8 @@ const AppContextProvider = ({ children }) => {
   const audioRef = useRef(typeof Audio !== "undefined" ? new Audio(notificationSound) : null);
   const prevWidth = useRef(window.innerWidth);
   const reconnectTimeoutRef = useRef(null);
+  const typingTimersRef = useRef({});
+  const [isConnected, setIsConnected] = React.useState(false);
 
   // load contacts from IndexedDB on startup (no-op if none)
   useEffect(() => {
@@ -99,6 +102,7 @@ const AppContextProvider = ({ children }) => {
         { Authorization: `Bearer ${token}` },
         () => {
           console.log("✅ Connected to WebSocket (STOMP)");
+          setIsConnected(true);
 
           // on connect: initial sync
           dispatch(getAllConversationsThunk(userObject.phoneNumber));
@@ -149,6 +153,14 @@ const AppContextProvider = ({ children }) => {
             client.subscribe("/user/queue/message", (privateMsg) => {
               try {
                 const received = JSON.parse(privateMsg.body);
+                console.log(received)
+                     const statusUpdate = {
+          id: received.id,
+          senderPhone: received.senderPhone,
+          receiverPhone: received.receiverPhone,
+          status: "dilivered",
+        };
+        stompClientRef.current.send("/app/updateStatus",{},JSON.stringify(statusUpdate));
                 const normalized = normalizeIncoming(received);
                 handleIncoming(normalized);
               } catch (err) {
@@ -202,9 +214,41 @@ const AppContextProvider = ({ children }) => {
           } catch (e) {
             console.warn("subscribe /topic/presence error", e);
           }
+
+          // subscription: typing events
+          try {
+            client.subscribe("/user/queue/typing", (typingMsg) => {
+              try {
+                const typingEvent = JSON.parse(typingMsg.body);
+                const contactPhoneNumber = typingEvent.from;
+
+                if (typingEvent.typing) {
+                  dispatch(startTyping({ contactPhoneNumber }));
+                  // Clear any existing timer
+                  if (typingTimersRef.current[contactPhoneNumber]) {
+                    clearTimeout(typingTimersRef.current[contactPhoneNumber]);
+                  }
+                  // Set a new timer to stop the typing indicator
+                  typingTimersRef.current[contactPhoneNumber] = setTimeout(() => {
+                    dispatch(stopTyping({ contactPhoneNumber }));
+                  }, 3000); // 3 seconds
+                } else {
+                  if (typingTimersRef.current[contactPhoneNumber]) {
+                    clearTimeout(typingTimersRef.current[contactPhoneNumber]);
+                  }
+                  dispatch(stopTyping({ contactPhoneNumber }));
+                }
+              } catch (err) {
+                console.warn("Failed to parse /user/queue/typing", err);
+              }
+            });
+          } catch (e) {
+            console.warn("subscribe /user/queue/typing error", e);
+          }
         },
         (error) => {
           console.error("❌ STOMP connect error", error);
+          setIsConnected(false);
           // try reconnect with backoff (avoid flooding)
           if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
           reconnectTimeoutRef.current = setTimeout(() => connect(), 2000 + Math.random() * 3000);
@@ -220,6 +264,7 @@ const AppContextProvider = ({ children }) => {
         if (stompClientRef.current && stompClientRef.current.connected) {
           stompClientRef.current.disconnect(() => {
             console.log("🔌 STOMP disconnected (cleanup)");
+            setIsConnected(false);
           });
         }
       } catch (e) {
@@ -228,6 +273,8 @@ const AppContextProvider = ({ children }) => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
+      // Clear all typing timers on disconnect
+      Object.values(typingTimersRef.current).forEach(clearTimeout);
     };
   }, [userObject, dispatch]);
 
@@ -295,7 +342,7 @@ const AppContextProvider = ({ children }) => {
   }, [userObject?.phoneNumber, dispatch]);
 
   return (
-    <AppContext.Provider value={{ stompClient: stompClientRef }}>
+    <AppContext.Provider value={{ stompClient: stompClientRef, isConnected }}>
       {children}
     </AppContext.Provider>
   );

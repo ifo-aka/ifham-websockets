@@ -17,7 +17,11 @@ public class WebSocketConfigs implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
 
         registry.addEndpoint("/ws/chat")
-                .setAllowedOrigins("http://localhost:5173")
+                .setAllowedOrigins("http://localhost:5173","http://192.168.43.99:5173","http://192.168.56.1:5173")
+                .withSockJS();
+
+        registry.addEndpoint("/ws/video-call")
+                .setAllowedOrigins("http://localhost:5173","http://192.168.43.99:5173","http://192.168.56.1:5173")
                 .withSockJS();
     }
 

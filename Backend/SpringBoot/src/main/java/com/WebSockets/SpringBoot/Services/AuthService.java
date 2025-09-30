@@ -42,7 +42,7 @@ public class AuthService {
         // create access token to return to client
         String accessToken = jwtService.generateAccessToken(user.getUsername());
 
-        return new UserDto(user.getId(), user.getUsername(), user.getEmail(),user.getPhoneNumber() ,accessToken);
+        return new UserDto(user.getId(), user.getUsername(), user.getEmail(),user.getPhoneNumber() ,accessToken, user.getNickname(), user.getProfilePictureUrl());
     }
 
     public UserDto signUp(@Valid SignUpRequestModel request) {
@@ -65,6 +65,6 @@ public class AuthService {
         // Return only access token to client
         String accessToken = jwtService.generateAccessToken(saved.getUsername());
 
-        return new UserDto(saved.getId(), saved.getUsername(), saved.getEmail(),saved.getPhoneNumber(), accessToken);
+        return new UserDto(saved.getId(), saved.getUsername(), saved.getEmail(),saved.getPhoneNumber(), accessToken, saved.getNickname(), saved.getProfilePictureUrl());
     }
 }

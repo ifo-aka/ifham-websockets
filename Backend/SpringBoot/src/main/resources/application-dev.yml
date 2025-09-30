@@ -18,11 +18,13 @@ spring:
       max-request-size: 50MB
 
 file:
-  upload-dir: "C:/Users/dell/Desktop/SpringCore/src/main/resources/photos"
-
-
+  upload-dir: "c:/Users/dell/Documents/ws-ocr-chat/Backend/SpringBoot/uploads"
 
 jwt:
   secret: "lkjgc87y3iul4biuqweyf9p7ykjebkl3uyr98ywhekjfbiuowe6yf97pq2h3krjbo7826tr7qwiuehbfjkbe7w6f9723hrkjbi7fe6q78yrhjk3b4r78o6te87yrhgrkjq34rbi76ef7yhq34ujrbhie76r0f6q3p4ouihrkjge78f697wehrkjbrio23tr07gri487"
   expiration: 600000
   refreshExpiration: 604800000
+
+server:
+  address: 0.0.0.0
+  port: 8080

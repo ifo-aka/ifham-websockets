@@ -12,4 +12,6 @@ import java.util.Optional;
 
 public interface ContactRepository extends JpaRepository<ContactEntity,Long> {
   boolean  existsByUserAndPhoneNumber(UserEntity entity,String phoneNumber);
+  @Query("Select u.profilePictureUrl FROM UserEntity u Where u.phoneNumber = :phoneNumber")
+  Optional<String> findProfilePictureUrlByPhoneNumber(String phoneNumber);
 }

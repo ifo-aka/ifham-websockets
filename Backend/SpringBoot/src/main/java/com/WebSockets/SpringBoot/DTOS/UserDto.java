@@ -15,6 +15,8 @@ public class UserDto {
     private String  email;
     private String phoneNumber;
     private  String token;
+    private String nickname;
+    private String profilePictureUrl;
 
 
 

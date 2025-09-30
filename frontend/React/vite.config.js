@@ -6,5 +6,11 @@ export default defineConfig({
   plugins: [react()],
   define: {
     global: "window",
-  }
+  },
+    optimizeDeps: {
+    include: ["simple-peer"],
+  },
+  ssr: {
+    noExternal: ["simple-peer"],
+  },
 })

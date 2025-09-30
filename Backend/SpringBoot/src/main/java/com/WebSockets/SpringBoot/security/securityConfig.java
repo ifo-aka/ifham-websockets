@@ -40,6 +40,7 @@ public class securityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/photos/**").permitAll() // Allow access to uploaded photos
                         .requestMatchers("/ws/**").permitAll() // 👈 allow WebSocket
 
                         // Protected endpoints
@@ -73,7 +74,7 @@ public class securityConfig {
 @Bean
     public CorsConfigurationSource corsConfigurationSource(){
     CorsConfiguration corsConfiguration = new CorsConfiguration();
-  corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
+  corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173","http://192.168.43.99:5173","http://192.168.56.1:5173"));
   corsConfiguration.setAllowedMethods(List.of("GET","PUT","DELETE","POST"));
   corsConfiguration.setAllowedHeaders(List.of("*"));
   corsConfiguration.setAllowCredentials(true);

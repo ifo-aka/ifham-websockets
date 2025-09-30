@@ -163,20 +163,21 @@ if (name === "phoneNumber") {
         dispatch(setShowSpinner(false));
         dispatch(setAuthChecked(true));
         const data = response.payload?.data;
-        if(data.username){
+        
+        if(data?.username){
           setError( data.username)
           setTimeout(() => {
             setError("")
           }, 5000);
           return
-        }else if(data.email){
+        }else if(data?.email){
           setError( data.email)
                    setTimeout(() => {
             setError("")
           }, 5000);
           return
         }
-        else if(data.password){
+        else if(data?.password){
           setError( data.password)
                    setTimeout(() => {
             setError("")

@@ -5,6 +5,7 @@ import {
   signup as dbSignup,
   refreshToken as dbRefreshToken,
 } from "../../utils/DBUtils";
+import { updateUserProfile } from '../../services/userService';
 
 // ====================== Async Thunks ======================
 
@@ -53,6 +54,22 @@ export const refreshTokenThunk = createAsyncThunk(
   }
 );
 
+export const updateUserProfileThunk = createAsyncThunk(
+  "api/auth/updateProfile",
+  async ({ userId, formData }, { getState, rejectWithValue }) => {
+    try {
+      const { token } = getState().auth;
+      const response = await updateUserProfile(userId, formData, token);
+      if (!response.success) {
+        return rejectWithValue(response);
+      }
+      return response.data; // The updated user DTO
+    } catch (error) {
+      return rejectWithValue(error.toString());
+    }
+  }
+);
+
 // ====================== Slice ======================
 
 const authSlice = createSlice({
@@ -67,6 +84,8 @@ const authSlice = createSlice({
       username: "",
       email: "",
       phoneNumber: "",
+      nickname: "",
+      profilePictureUrl: "",
     },
   },
   reducers: {
@@ -74,7 +93,7 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.authChecked = false;
-      state.userObject = { id: null, username: null, email: null };
+      state.userObject = { id: null, username: null, email: null, nickname: null, profilePictureUrl: null };
       localStorage.removeItem("token");
     },
     setShowSpinner: (state, action) => {
@@ -98,11 +117,11 @@ const authSlice = createSlice({
     builder
       // LOGIN
       .addCase(loginThunk.fulfilled, (state, action) => {
-        const { id, username, email, token ,phoneNumber} = action.payload.data;
+        const { id, username, email, token ,phoneNumber, nickname, profilePictureUrl} = action.payload.data;
         state.token = token;
         state.isAuthenticated = true;
         state.authChecked = true;
-        state.userObject = { id, username, email, phoneNumber };
+        state.userObject = { id, username, email, phoneNumber, nickname, profilePictureUrl };
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
@@ -112,7 +131,7 @@ const authSlice = createSlice({
           state.token = null;
           state.isAuthenticated = false;
           state.authChecked = false;
-          state.userObject = { id: null, username: null, email: null, phoneNumber: null };
+          state.userObject = { id: null, username: null, email: null, phoneNumber: null, nickname: null, profilePictureUrl: null };
           localStorage.removeItem("token");
         } else {
           // Network/server error: don't delete token, just set auth to false
@@ -127,11 +146,11 @@ const authSlice = createSlice({
 
       // SIGNUP
       .addCase(signupThunk.fulfilled, (state, action) => {
-        const { id, username, email, token ,phoneNumber} = action.payload.data;
+        const { id, username, email, token ,phoneNumber, nickname, profilePictureUrl} = action.payload.data;
         state.token = token;
         state.isAuthenticated = true;
         state.authChecked = true;
-        state.userObject = { id, username, email ,phoneNumber };
+        state.userObject = { id, username, email ,phoneNumber, nickname, profilePictureUrl };
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
@@ -141,7 +160,7 @@ const authSlice = createSlice({
           state.token = null;
           state.isAuthenticated = false;
           state.authChecked = false;
-          state.userObject = { id: null, username: null, email: null, phoneNumber: null };
+          state.userObject = { id: null, username: null, email: null, phoneNumber: null, nickname: null, profilePictureUrl: null };
           localStorage.removeItem("token");
         } else {
           // Network/server error: don't delete token, just set auth to false
@@ -156,11 +175,11 @@ const authSlice = createSlice({
 
       // REFRESH TOKEN
       .addCase(refreshTokenThunk.fulfilled, (state, action) => {
-        const { id, username, email, token, phoneNumber } = action.payload.data;
+        const { id, username, email, token, phoneNumber, nickname, profilePictureUrl } = action.payload.data;
         state.token = token;
         state.isAuthenticated = true;
         state.authChecked = true;
-        state.userObject = { id, username, email, phoneNumber };
+        state.userObject = { id, username, email, phoneNumber, nickname, profilePictureUrl };
         localStorage.setItem("token", token);
         state.showSpinner = false;
       })
@@ -170,7 +189,7 @@ const authSlice = createSlice({
           state.token = null;
           state.isAuthenticated = false;
           state.authChecked = false;
-          state.userObject = { id: null, username: null, email: null, phoneNumber: null };
+          state.userObject = { id: null, username: null, email: null, phoneNumber: null, nickname: null, profilePictureUrl: null };
           localStorage.removeItem("token");
         } else {
           // Network/server error: don't delete token, just set auth to false
@@ -180,6 +199,20 @@ const authSlice = createSlice({
         state.showSpinner = false;
       })
       .addCase(refreshTokenThunk.pending, (state) => {
+        state.showSpinner = true;
+      })
+
+      // UPDATE USER PROFILE
+      .addCase(updateUserProfileThunk.fulfilled, (state, action) => {
+        state.userObject = { ...state.userObject, ...action.payload };
+        state.showSpinner = false;
+      })
+      .addCase(updateUserProfileThunk.rejected, (state, action) => {
+        // Handle error, maybe show a notification
+        console.error("Profile update failed:", action.payload);
+        state.showSpinner = false;
+      })
+      .addCase(updateUserProfileThunk.pending, (state) => {
         state.showSpinner = true;
       });
   },

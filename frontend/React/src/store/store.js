@@ -6,6 +6,8 @@ import notificationReducer from "./slices/notificationSlice";
 import chatReducer from "./slices/chatSlice"; 
 import contactReducer from "./slices/contactsSlice";
 import presenceReducer from "./slices/presenceSlice";
+import typingReducer from "./slices/typingSlice";
+import videoCallReducer from "./slices/videoCallSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +18,8 @@ export const store = configureStore({
         chat: chatReducer,
         contact :contactReducer,
         presence: presenceReducer,
+        typing: typingReducer,
+        videoCall: videoCallReducer,
 
   },
 });

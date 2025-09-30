@@ -17,7 +17,10 @@ async function safeJson(resp) {
 }
 
 // Generic fetch wrapper
-const apiFetch = async (endpoints, { authRequired = false, option = {} } = {}) => {
+const apiFetch = async (
+  endpoints,
+  { authRequired = false, option = {} } = {}
+) => {
   const token = getToken();
   if (!token && authRequired) {
     return {
@@ -90,6 +93,7 @@ const apiFetch = async (endpoints, { authRequired = false, option = {} } = {}) =
     }
 
     const json = await safeJson(resp);
+    console.log(json)
     if (json === null) {
       // fallback when response is not JSON
       return {
@@ -162,14 +166,23 @@ export const getContacts = (userId) => {
   });
 };
 
+// check if a user exists
+
+export const isContactAvailible = (number) => {
+  return apiFetch(`/api/user/check-phone?phone=${number}`, {
+    authRequired: true,
+    option: { method: "GET", headers: { "Content-Type": "application/json" } },
+  });
+};
+
 // Add a new contact
-export const addContact = (contactData, userId) => {
-  return apiFetch(`/api/user/${userId}/contacts`, {
+export const addContact = ({savedAs,phoneNumber,id}) => {
+  return apiFetch(`/api/user/${id}/contacts`, {
     authRequired: true,
     option: {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contactData),
+      body: JSON.stringify({savedAs,phoneNumber}),
     },
   });
 };
@@ -179,6 +192,16 @@ export const deleteContact = (contactId) => {
   return apiFetch(`/api/contacts/${contactId}`, {
     authRequired: true,
     option: { method: "DELETE" },
+  });
+};
+
+export const updateUserProfile = (userId, formData) => {
+  return apiFetch(`/api/user/${userId}/profile`, {
+    authRequired: true,
+    option: {
+      method: 'PUT',
+      body: formData,
+    },
   });
 };
 

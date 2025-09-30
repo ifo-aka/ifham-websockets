@@ -55,6 +55,12 @@ public class UserEntity {
     @Column(name = "exp")
     private LocalDateTime refreshTokenExpiry;
 
+    @Column(name = "nickname")
+    private String nickname;
+
+    @Column(name = "profile_picture_url")
+    private String profilePictureUrl;
+
     // 🔥 Relationship with Contacts
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContactEntity> contacts = new ArrayList<>();

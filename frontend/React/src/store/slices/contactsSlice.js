@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {addContact,deleteContact,getContacts} from "../../utils/DBUtils";
+import {addContact,deleteContact,getContacts,isContactAvailible} from "../../utils/DBUtils";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 // Thunks
@@ -9,7 +9,7 @@ export const addContactThunk = createAsyncThunk(
      async(contact,{ rejectWithValue })=>{
         console.log(contact)
         try {
-            const response= await addContact({savedAs: contact.saveAs, phoneNumber: contact.phoneNumber}, contact.id);
+            const response= await addContact( contact);
             console.log(response);
             if(!response.success){
                 return rejectWithValue(response)
@@ -17,7 +17,7 @@ export const addContactThunk = createAsyncThunk(
             return response;
 
      }catch (error) {
-            return rejectWithValue("Network error or server is unreachable.");
+            return rejectWithValue(error);
         }
     }
 )
@@ -35,6 +35,24 @@ export const getContactsThunk=createAsyncThunk(
         catch (error) {
             return rejectWithValue("Network error or server is unreachable.");
         }
+    }
+)
+export const isContactAvailibleThunk=createAsyncThunk(
+    "/api/user/check-phone",
+    async(number,{rejectWithValue})=>{
+        try {
+            const response= await isContactAvailible(number);
+            // console.log(response);
+            if(!response.success){
+                rejectWithValue(response)
+            }
+            return response;
+
+        }
+        catch (error) {
+            return rejectWithValue("Network error or server is unreachable.");
+        }
+
     }
 )
 
