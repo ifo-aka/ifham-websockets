@@ -4,6 +4,7 @@ import com.WebSockets.SpringBoot.Services.JwtService;
 import com.WebSockets.SpringBoot.Repository.AuthRepository;
 import com.WebSockets.SpringBoot.Entity.UserEntity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtChannelInterceptor implements ChannelInterceptor {
@@ -34,6 +36,8 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 String username = jwtService.extractUsername(token);
 
                 userRepository.findByUsername(username).ifPresent(user -> {
+                  log.info("STOMP connect -> principal set: {}", user.getPhoneNumber());
+
                     accessor.setUser(new StompPrincipal(user.getPhoneNumber()));
                 });
             }

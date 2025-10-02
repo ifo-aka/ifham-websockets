@@ -354,3 +354,149 @@
   background-color: #aaa;
   cursor: not-allowed;
 }
+.videoContainer {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+z-index: 1100;
+background: rgba(0, 0, 0, 0.8);
+padding: 20px;
+border-radius: 12px;
+  display: flex;
+
+  align-items: center;
+  background: black;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center
+
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.controls button {
+  background: #222;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.controls button:hover {
+  background: #444;
+}
+
+/* Incoming Call Screen */
+.caller {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backdrop-filter: blur(12px);
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  animation: fadeIn 0.3s ease-in-out;
+  color: #fff;
+  text-align: center;
+}
+
+.callerAvatar {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  border: 4px solid #25d366;
+  margin-bottom: 20px;
+  animation: pulseGlow 2s infinite;
+}
+
+.caller h1 {
+  font-size: 1.4rem;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+/* Answer / Decline Buttons */
+.callActions {
+  display: flex;
+  gap: 40px;
+}
+
+.callButton {
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease-in-out;
+}
+
+.callButton:hover {
+  transform: scale(1.1);
+}
+
+.answer {
+  background-color: #25d366;
+}
+
+.decline {
+  background-color: #ff3b30;
+}
+
+/* Outgoing Call Screen */
+.outgoingCall {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backdrop-filter: blur(12px);
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  color: #fff;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.outgoingCall h1 {
+  font-size: 1.4rem;
+  margin-top: 20px;
+}
+
+.dots::after {
+  content: " .";
+  animation: dotsAnim 1.5s steps(3, end) infinite;
+}
+
+/* Animations */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(37,211,102,0.6); }
+  70% { box-shadow: 0 0 0 20px rgba(37,211,102,0); }
+  100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+}
+
+@keyframes dotsAnim {
+  0%, 20% { content: " ."; }
+  40% { content: " .."; }
+  60%, 100% { content: " ..."; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+

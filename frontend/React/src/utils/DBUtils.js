@@ -1,5 +1,6 @@
 // utils/DBUtils.js
-const BASE_URL = "http://localhost:8080";
+const BASE_ADDRESS = process.env.REACT_APP_BASE_ADDRESS || "localhost";
+const BASE_URL = `http://${BASE_ADDRESS}}:8080`;
 const getToken = () => localStorage.getItem("token");
 
 const authHeaders = () => {

@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080'; // It's better to move this to an env variable
+const API_BASE_URL = 'http://192.168.43.99:8080'; // It's better to move this to an env variable
 
 export const updateUserProfile = async (userId, formData, token) => {
     try {

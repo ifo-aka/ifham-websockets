@@ -8,6 +8,9 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+import java.security.Principal;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfigs implements WebSocketMessageBrokerConfigurer {
@@ -31,9 +34,12 @@ public class WebSocketConfigs implements WebSocketMessageBrokerConfigurer {
         registry.enableSimpleBroker("/topic","/queue");
 
         registry.setUserDestinationPrefix("/user");
+
     }
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(jwtChannelInterceptor);
     }
 }
+
+

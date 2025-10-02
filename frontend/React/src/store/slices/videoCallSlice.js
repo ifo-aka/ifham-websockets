@@ -1,3 +1,4 @@
+// src/store/slices/videoCallSlice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 const videoCallSlice = createSlice({
@@ -7,8 +8,10 @@ const videoCallSlice = createSlice({
     isReceivingCall: false,
     caller: null,
     offer: null,
-    remoteStream: null,
-    localStream: null, // 👈 add this
+    isCalling: false,
+    remoteStreamAvailable: false,
+
+
   },
   reducers: {
     setInCall: (state, action) => {
@@ -23,11 +26,11 @@ const videoCallSlice = createSlice({
     setOffer: (state, action) => {
       state.offer = action.payload;
     },
-    setRemoteStream: (state, action) => {
-      state.remoteStream = action.payload;
+    setIsCalling: (state, action) => {
+      state.isCalling = action.payload;
     },
-    setLocalStream: (state, action) => {   // 👈 add this
-      state.localStream = action.payload;
+    setRemoteStreamAvailable: (state, action) => {
+      state.remoteStreamAvailable = action.payload;
     },
   },
 });
@@ -37,8 +40,8 @@ export const {
   setIsReceivingCall,
   setCaller,
   setOffer,
-  setRemoteStream,
-  setLocalStream,   // 👈 export it
+  setIsCalling,
+  setRemoteStreamAvailable,
 } = videoCallSlice.actions;
 
 export default videoCallSlice.reducer;

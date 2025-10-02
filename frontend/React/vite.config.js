@@ -13,4 +13,12 @@ export default defineConfig({
   ssr: {
     noExternal: ["simple-peer"],
   },
+    resolve: {
+    alias: {
+      stream: "stream-browserify",
+      events: "events",
+    },
+  },
+
+
 })
